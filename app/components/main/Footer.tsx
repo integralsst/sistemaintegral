@@ -86,7 +86,7 @@ export default function Footer() {
               <li className="flex items-start gap-3 group">
                 <MapPin size={18} className="text-gray-400 mt-0.5" />
                 <span className="text-gray-500 text-[14px] font-medium leading-relaxed">
-                  Sede Administrativa<br />Manizales, Colombia
+                  Sede Administrativa<br />Pereira, Colombia
                 </span>
               </li>
               <li className="flex items-center gap-3 group">
