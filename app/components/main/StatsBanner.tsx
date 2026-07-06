@@ -1,94 +1,102 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { motion, useMotionValue, useTransform, animate, useInView } from 'framer-motion';
+import { BookOpen, Building2, ShieldCheck } from 'lucide-react';
 
-// Subcomponente lógico para manejar la iteración de los números
-const AnimatedCounter = ({ target, duration = 2000, suffix = "" }: { target: number, duration?: number, suffix?: string }) => {
-  const [count, setCount] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
+// Subcomponente animado nativo de Framer Motion
+const AnimatedCounter = ({ target, suffix = "", prefix = "" }: { target: number, suffix?: string, prefix?: string }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (latest) => Math.round(latest));
+  const display = useTransform(rounded, (latest) => 
+    Intl.NumberFormat('en-US').format(latest)
+  );
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          // Desconecta el observador para que la animación ocurra solo una vez
-          if (ref.current) observer.unobserve(ref.current);
-        }
-      },
-      { threshold: 0.1 } // Se activa cuando el 10% del componente es visible
-    );
-
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isVisible) return;
-
-    let startTime: number | null = null;
-    const startValue = 0;
-
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      
-      // Función matemática (easeOutExpo) para que desacelere suavemente al llegar al final
-      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-      
-      setCount(Math.floor(easeProgress * (target - startValue) + startValue));
-
-      if (progress < 1) {
-        window.requestAnimationFrame(step);
-      }
-    };
-
-    window.requestAnimationFrame(step);
-  }, [target, duration, isVisible]);
-
-  // Formatea el número para incluir la coma de miles (ej: 15,000)
-  const formattedNumber = new Intl.NumberFormat('en-US').format(count);
+    if (isInView) {
+      animate(count, target, {
+        duration: 2.5,
+        ease: [0.21, 0.47, 0.32, 0.98], // Curva de desaceleración tipo Apple
+      });
+    }
+  }, [isInView, target, count]);
 
   return (
-    <div ref={ref} className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-3 tracking-tighter">
-      {target > 100 ? "+" : ""}{formattedNumber}{suffix}
+    <div ref={ref} className="flex items-baseline justify-center font-black text-white tracking-tighter text-5xl md:text-6xl lg:text-7xl mb-2">
+      {prefix && <span>{prefix}</span>}
+      <motion.span>{display}</motion.span>
+      {suffix && <span>{suffix}</span>}
     </div>
   );
 };
 
 export default function StatsBanner() {
+  const stats = [
+    {
+      icon: <BookOpen size={32} strokeWidth={1.5} />,
+      target: 15000,
+      prefix: "+",
+      label: "Capacitaciones realizadas",
+      description: "Horas de formación certificadas"
+    },
+    {
+      icon: <Building2 size={32} strokeWidth={1.5} />,
+      target: 30000,
+      prefix: "+",
+      label: "Empresas asesoradas",
+      description: "A nivel nacional"
+    },
+    {
+      icon: <ShieldCheck size={32} strokeWidth={1.5} />,
+      target: 100,
+      suffix: "%",
+      label: "Cumplimiento legal",
+      description: "Auditorías superadas con éxito"
+    }
+  ];
+
   return (
-    <section className="w-full bg-blue-600 py-16 md:py-24 relative overflow-hidden">
+    <section className="w-full bg-gray-950 py-24 md:py-32 relative overflow-hidden">
       
-      {/* Capa de textura sutil (Degradado para evitar un color plano excesivamente brillante) */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-500 opacity-80 pointer-events-none"></div>
+      {/* Aura / Resplandor de fondo (Súper Premium) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-full bg-blue-600/20 blur-[120px] rounded-full pointer-events-none"></div>
+      
+      {/* Patrón de puntos sutil para textura */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:24px_24px] pointer-events-none"></div>
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Estructura dividida por líneas sutiles tipo Apple */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-0 md:divide-x divide-white/20 text-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-0 md:divide-x divide-gray-800 text-center">
+          
+          {stats.map((stat, index) => (
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: index * 0.2, ease: "easeOut" }}
+              className="flex flex-col items-center justify-center group"
+            >
+              {/* Ícono animado */}
+              <div className="mb-6 p-4 rounded-2xl bg-gray-900 border border-gray-800 text-blue-500 shadow-lg shadow-blue-900/20 group-hover:scale-110 group-hover:border-blue-500/50 group-hover:text-blue-400 transition-all duration-500">
+                {stat.icon}
+              </div>
 
-          <div className="flex flex-col items-center justify-center">
-            <AnimatedCounter target={15000} />
-            <p className="text-blue-100 text-lg md:text-xl font-medium tracking-wide">
-              Capacitaciones realizadas
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center justify-center pt-12 md:pt-0 border-t border-white/20 md:border-t-0">
-            <AnimatedCounter target={30000} />
-            <p className="text-blue-100 text-lg md:text-xl font-medium tracking-wide">
-              Empresas asesoradas
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center justify-center pt-12 md:pt-0 border-t border-white/20 md:border-t-0">
-            <AnimatedCounter target={100} suffix="%" />
-            <p className="text-blue-100 text-lg md:text-xl font-medium tracking-wide">
-              Clientes satisfechos
-            </p>
-          </div>
+              {/* Contador */}
+              <AnimatedCounter target={stat.target} suffix={stat.suffix} prefix={stat.prefix} />
+              
+              {/* Textos */}
+              <h3 className="text-gray-300 text-xl font-bold tracking-tight mb-1">
+                {stat.label}
+              </h3>
+              <p className="text-gray-500 text-sm font-medium">
+                {stat.description}
+              </p>
+            </motion.div>
+          ))}
 
         </div>
       </div>

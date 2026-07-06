@@ -24,8 +24,10 @@ const Linkedin = ({ className, strokeWidth = 1.5 }: { className?: string, stroke
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Bloquear el scroll del body cuando el menú móvil está abierto
+  // Lógica para bloquear scroll con el menú abierto
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -34,7 +36,31 @@ export default function Navbar() {
     }
   }, [isMobileMenuOpen]);
 
-  // Sincronizado con los 4 items de tu componente Services
+  // Lógica para el Smart Navbar (Ocultar al bajar, mostrar al subir)
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Si el menú móvil está abierto, nunca ocultar el Navbar
+      if (isMobileMenuOpen) {
+        setIsVisible(true);
+        return;
+      }
+
+      // Si hacemos scroll hacia abajo y hemos pasado la altura del navbar (80px)
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        setIsVisible(false); // Ocultar
+      } else {
+        setIsVisible(true);  // Mostrar al subir
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, isMobileMenuOpen]);
+
   const servicios = [
     { name: "Gestión Documental", href: "/servicios/gestion-documental" },
     { name: "Gestión a la Intervención", href: "/servicios/gestion-a-la-intervencion" },
@@ -44,7 +70,11 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 w-full z-[999] bg-white/80 backdrop-blur-md text-gray-800 border-b border-gray-100/50">
+      <nav 
+        className={`fixed top-0 w-full z-[999] bg-white/80 backdrop-blur-md text-gray-800 border-b border-gray-100/50 transition-transform duration-500 ease-[cubic-bezier(0.21,0.47,0.32,0.98)] ${
+          isVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             

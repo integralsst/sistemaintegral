@@ -72,25 +72,26 @@ export default function Services() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 font-bold text-xs tracking-widest uppercase mb-8 shadow-sm"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/10 text-blue-700 font-semibold text-sm tracking-wide mb-8"
         >
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-600 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
           </span>
-          Cobertura Nacional
+          Operación a Nivel Nacional
         </motion.div>
 
+        {/* Título corregido con la paleta de colores solicitada */}
         <motion.h1 
           initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="text-5xl sm:text-7xl lg:text-[6rem] font-black leading-[0.95] tracking-tighter text-gray-950 mb-8 max-w-5xl"
+          className="text-4xl sm:text-6xl lg:text-[5rem] font-black leading-[1] tracking-tighter text-gray-950 mb-8 max-w-5xl"
         >
-          Ecosistema Preventivo. <br className="hidden md:block" />
-          <span className="bg-gradient-to-br from-gray-900 via-blue-800 to-blue-500 text-transparent bg-clip-text">
-            Elevando el estándar.
+          Seguridad y Salud en el Trabajo. <br className="hidden md:block" />
+          <span className="bg-gradient-to-r from-cyan-300 to-blue-600 text-transparent bg-clip-text">
+            Llevada al Siguiente Nivel.
           </span>
         </motion.h1>
 
@@ -101,7 +102,7 @@ export default function Services() {
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           className="text-xl md:text-2xl text-gray-500 font-medium max-w-3xl leading-relaxed tracking-tight mb-20"
         >
-          Automatice inspecciones, gestione riesgos en tiempo real y blinde su empresa con una arquitectura de seguridad diseñada para la protección absoluta.
+          Automatiza las inspecciones y gestiona riesgos en tiempo real con un ecosistema integral diseñado para la protección absoluta de tu organización.
         </motion.p>
 
         <motion.div 
@@ -146,7 +147,7 @@ export default function Services() {
                   
                   <div className="mt-auto flex items-center justify-between text-blue-600 font-bold text-[15px]">
                     <span className="opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-[cubic-bezier(0.21,0.47,0.32,0.98)]">
-                      Explorar solución
+                      Saber más
                     </span>
                     <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-blue-50 transition-colors duration-500">
                       <ArrowRight size={18} className="transform -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
