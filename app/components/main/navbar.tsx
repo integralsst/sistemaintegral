@@ -42,17 +42,9 @@ export default function Navbar() {
     { name: "Gestión Especializada", href: "/servicios/gestion-especializada" },
   ];
 
-  const nosotros = [
-    { name: "Quienes Somos", href: "/nosotros/quienes-somos" },
-    { name: "Certificaciones", href: "/nosotros/certificaciones" },
-    { name: "Trabaje con Nosotros", href: "/nosotros/trabaje-con-nosotros" },
-    { name: "PQRSF", href: "/nosotros/pqrsf" },
-    { name: "Pagos PSE", href: "/nosotros/pagos-pse" },
-  ];
-
   return (
     <>
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md text-gray-800 border-b border-gray-100/50">
+      <nav className="fixed top-0 w-full z-[999] bg-white/80 backdrop-blur-md text-gray-800 border-b border-gray-100/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             
@@ -84,25 +76,6 @@ export default function Navbar() {
                 </button>
                 <div className="absolute left-0 mt-0 w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-gray-100/50 transform origin-top -translate-y-2 group-hover:translate-y-0">
                   {servicios.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="block px-5 py-2.5 text-sm text-gray-600 hover:bg-gray-50/80 hover:text-blue-600 transition-colors"
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Dropdown Nosotros */}
-              <div className="relative group py-6">
-                <button className="flex items-center text-sm font-medium hover:text-blue-600 transition-colors">
-                  NOSOTROS
-                  <ChevronDown className="w-4 h-4 ml-1 opacity-50 group-hover:opacity-100 transition-opacity" />
-                </button>
-                <div className="absolute left-0 mt-0 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-gray-100/50 transform origin-top -translate-y-2 group-hover:translate-y-0">
-                  {nosotros.map((item) => (
                     <Link
                       key={item.name}
                       href={item.href}
@@ -172,23 +145,6 @@ export default function Navbar() {
               <div className="text-sm font-bold text-blue-600 tracking-wider">SERVICIOS</div>
               <div className="flex flex-col space-y-4">
                 {servicios.map((item) => (
-                  <Link 
-                    key={item.name} 
-                    href={item.href} 
-                    className="flex items-center justify-between text-xl text-gray-600 hover:text-gray-900 transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                    <ChevronRight className="w-5 h-5 opacity-40" />
-                  </Link>
-                ))}
-              </div>
-            </div>
-            
-            <div className="space-y-4 pt-4 border-t border-gray-100">
-              <div className="text-sm font-bold text-blue-600 tracking-wider">NOSOTROS</div>
-              <div className="flex flex-col space-y-4">
-                {nosotros.map((item) => (
                   <Link 
                     key={item.name} 
                     href={item.href} 
