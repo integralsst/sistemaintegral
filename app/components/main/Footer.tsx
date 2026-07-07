@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Mail, Phone, MapPin } from 'lucide-react';
+// Importamos el ícono Lock de lucide-react
+import { Mail, Phone, MapPin, Lock } from 'lucide-react';
 
 // SVGs nativos para redes sociales (minimalistas)
 const InstagramIcon = ({ size = 18 }) => (
@@ -107,10 +108,21 @@ export default function Footer() {
           <p className="text-[#86868b] font-medium text-[12px]">
             © {currentYear} SIS Sistema Integral en Riesgos Laborales. Todos los derechos reservados.
           </p>
-          <div className="flex gap-6 text-[12px] font-medium text-[#86868b]">
+          <div className="flex gap-6 items-center text-[12px] font-medium text-[#86868b]">
             <Link href="/politica-privacidad" className="hover:text-gray-900 transition-colors">Política de Privacidad</Link>
             <span className="w-px h-3 bg-gray-300 self-center hidden md:block"></span>
             <Link href="/terminos-condiciones" className="hover:text-gray-900 transition-colors">Términos de Servicio</Link>
+            
+            {/* Divisor y botón de inicio de sesión con candado */}
+            <span className="w-px h-3 bg-gray-300 self-center hidden md:block"></span>
+            <Link 
+              href="/login" 
+              className="hover:text-gray-900 transition-all duration-300 hover:scale-110 flex items-center justify-center p-1" 
+              aria-label="Iniciar Sesión"
+              title="Acceso al sistema"
+            >
+              <Lock size={14} className="stroke-[2.5px]" />
+            </Link>
           </div>
         </div>
       </div>
