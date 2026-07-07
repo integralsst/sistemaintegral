@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image"; // Importamos Image para el logo
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -9,9 +9,8 @@ import {
   LogOut,
   Menu,
   X,
-  PlusCircle,
+  Plus,
   Home,
-  ShieldCheck,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -27,7 +26,7 @@ export default function DashboardLayout({
 
   const menuItems = [
     { name: "Resumen", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Artículos del Blog", href: "/dashboard/posts", icon: FileText },
+    { name: "Artículos", href: "/dashboard/posts", icon: FileText },
   ];
 
   const mockUser = {
@@ -38,12 +37,8 @@ export default function DashboardLayout({
 
   const handleSignOut = async () => {
     setIsLoggingOut(true);
-
     try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-      });
-
+      await fetch("/api/auth/logout", { method: "POST" });
       router.push("/");
       router.refresh();
     } finally {
@@ -51,76 +46,69 @@ export default function DashboardLayout({
     }
   };
 
-  // Definimos colores principales en el diseño
-  const colors = {
-    primary: "blue-600",
-    primaryHover: "blue-500",
-    dark: "gray-950",
-    darkAccent: "gray-900",
-    logout: "red-500",
-    white: "white",
-  };
-
   return (
-    <div className={`min-h-screen bg-gray-50 flex font-sans selection:bg-${colors.primary}/20`}>
-      {/* Overlay Móvil con Efecto de Cristal */}
+    /* Fondo principal: El color #F5F5F7 es el clásico gris claro de Apple */
+    <div className="min-h-screen bg-[#F5F5F7] flex font-sans text-gray-900 overflow-hidden selection:bg-blue-200">
+      
+      {/* Overlay Móvil */}
       <div
-        className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity duration-500 md:hidden ${
+        className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden ${
           isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsSidebarOpen(false)}
       />
 
-      {/* Sidebar - Estilo Premium Apple */}
+      {/* Sidebar Flotante - Estilo Apple VisionOS / macOS 
+        En lugar de pegarlo al borde, le damos margen (m-4) y lo hacemos flotar con efecto cristal.
+      */}
       <aside
         className={`
-        fixed md:relative inset-y-0 left-0 z-50 w-[280px] bg-gray-950/90 text-white transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col border-r border-gray-800/50 backdrop-blur-md rounded-r-3xl md:rounded-none md:translate-x-0
-        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        fixed md:relative inset-y-0 left-0 z-50 w-[280px] m-0 md:my-4 md:ml-4 bg-white/70 backdrop-blur-2xl 
+        transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col 
+        border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+        rounded-r-3xl md:rounded-3xl
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}
       >
-        {/* Cabecera del Sidebar con Logo */}
+        {/* Cabecera del Sidebar */}
         <div className="p-8 flex items-center justify-between">
-          <div className="flex flex-col gap-3">
-            <div className="relative h-10 w-full flex items-center justify-center">
-              <Image 
-                src="/images/logo.png" // Ruta de tu logo
-                alt="Logo Sistema Integral"
-                width={160} // Ajusta el tamaño según tu logo
-                height={40}
-                className="object-contain"
-                priority // Carga prioritaria
-              />
+          <div className="flex flex-col gap-1 w-full">
+            <div className="relative h-8 w-full flex items-center justify-start">
+              {/* Reemplaza con tu logo real. Usando texto temporal elegante si no hay logo */}
+              <span className="text-xl font-semibold tracking-tight text-black">
+                SisRiesgos
+              </span>
             </div>
-            <span className="block text-[10px] text-center text-gray-400 uppercase tracking-[0.25em] font-semibold">
-              Admin Workspace
+            <span className="block text-[10px] text-gray-400 font-medium tracking-widest uppercase mt-1">
+              Workspace
             </span>
           </div>
 
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="md:hidden p-2 rounded-full bg-gray-900 text-white hover:text-blue-400 transition-colors"
+            className="md:hidden p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Botón Nuevo Registro - Premium */}
+        {/* Botón Principal - Estilo Píldora de Apple */}
         <div className="px-6 mb-8">
           <Link
             href="/dashboard/posts/new"
             onClick={() => setIsSidebarOpen(false)}
-            className={`flex items-center justify-center gap-2.5 w-full bg-${colors.primary} hover:bg-${colors.primaryHover} text-white py-3 rounded-2xl font-medium transition-all duration-300 shadow-[0_10px_20px_rgba(37,99,235,0.2)] hover:shadow-[0_15px_25px_rgba(37,99,235,0.35)] hover:-translate-y-0.5 group`}
+            className="flex items-center justify-center gap-2 w-full bg-black hover:bg-gray-800 text-white py-3.5 rounded-full font-medium transition-all duration-300 shadow-md hover:shadow-lg active:scale-95 group"
           >
-            <PlusCircle
+            <Plus
               size={18}
               className="group-hover:rotate-90 transition-transform duration-500 ease-out"
             />
-            <span>Nuevo Registro</span>
+            <span className="text-sm">Nuevo Registro</span>
           </Link>
         </div>
 
         {/* Navegación Principal */}
-        <nav className="px-4 space-y-2 flex-1">
+        <nav className="px-4 space-y-1 flex-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
 
@@ -129,97 +117,86 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsSidebarOpen(false)}
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 font-medium text-sm group ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 font-medium text-sm ${
                   isActive
-                    ? "bg-white/10 text-white shadow-inner border border-white/5"
-                    : "text-gray-300 hover:bg-white/5 hover:text-white"
+                    ? "bg-white shadow-sm text-black border border-gray-100"
+                    : "text-gray-500 hover:bg-white/50 hover:text-black"
                 }`}
               >
                 <item.icon
                   size={18}
                   className={`transition-colors duration-300 ${
-                    isActive ? `text-${colors.primary}` : "text-gray-400 group-hover:text-gray-100"
+                    isActive ? "text-blue-500" : "text-gray-400"
                   }`}
+                  strokeWidth={isActive ? 2.5 : 2}
                 />
                 <span>{item.name}</span>
-                {isActive && (
-                  <div className={`absolute right-4 w-1 h-1 bg-${colors.primary} rounded-full`}></div>
-                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Enlace Ir al Sitio Web */}
+        {/* Enlaces Secundarios */}
         <div className="px-4 pb-4">
           <Link
             href="/"
-            className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 hover:text-white transition-all font-medium text-sm border border-transparent hover:border-gray-800 group"
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 hover:bg-white/50 hover:text-black transition-all font-medium text-sm"
           >
-            <Home
-              size={18}
-              className="text-gray-400 group-hover:text-white transition-colors"
-            />
+            <Home size={18} className="text-gray-400" />
             <span>Ir al Sitio Web</span>
           </Link>
         </div>
 
-        {/* Sección Usuario / Logout - Integrado */}
-        <div className="p-6 bg-gray-900/40 border-t border-gray-800/50 mt-auto backdrop-blur-sm rounded-t-3xl">
-          <div className="flex items-center gap-4 mb-6">
-            <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-${colors.primary} to-blue-700 flex items-center justify-center text-white font-bold shadow-lg border border-white/10`}>
+        {/* Sección de Usuario - Minimalista */}
+        <div className="p-4 m-4 bg-white/50 rounded-2xl border border-white/60">
+          <div className="flex items-center gap-3 mb-4 px-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold shadow-inner">
               {mockUser.initial}
             </div>
-
-            <div className="overflow-hidden">
-              <p className="text-sm font-bold text-white truncate">
+            <div className="overflow-hidden flex-1">
+              <p className="text-sm font-semibold text-gray-900 truncate">
                 {mockUser.name}
               </p>
-              <p className="text-xs text-gray-400 truncate tracking-tight">{mockUser.email}</p>
+              <p className="text-xs text-gray-500 truncate">
+                {mockUser.email}
+              </p>
             </div>
           </div>
 
           <button
             onClick={handleSignOut}
             disabled={isLoggingOut}
-            className={`w-full flex items-center justify-center gap-2 bg-gray-900/70 hover:bg-${colors.logout}/10 text-gray-200 hover:text-${colors.logout} py-3.5 rounded-2xl transition-all text-sm font-medium border border-gray-800 hover:border-${colors.logout}/20 group disabled:opacity-60 disabled:cursor-not-allowed`}
+            className="w-full flex items-center justify-center gap-2 bg-white hover:bg-red-50 text-gray-600 hover:text-red-500 py-2.5 rounded-xl transition-colors text-sm font-medium border border-gray-100 disabled:opacity-50"
           >
-            <LogOut
-              size={16}
-              className="group-hover:-translate-x-1 transition-transform"
-            />
-            {isLoggingOut ? "Cerrando..." : "Cerrar Sesión"}
+            <LogOut size={16} />
+            {isLoggingOut ? "Saliendo..." : "Cerrar Sesión"}
           </button>
         </div>
       </aside>
 
       {/* Área de Contenido Principal */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Cabecera Móvil - Transparente */}
-        <header className="bg-white/70 backdrop-blur-xl border-b border-gray-200/50 p-4 flex items-center justify-between md:hidden z-30 sticky top-0 supports-[backdrop-filter]:bg-white/50">
-          <div className="relative h-8 w-32">
-            <Image 
-              src="/images/logo.png" 
-              alt="Logo Sistema Integral"
-              fill
-              className="object-contain object-left"
-            />
-          </div>
-
+        
+        {/* Cabecera Móvil - Glassmorphism */}
+        <header className="bg-white/70 backdrop-blur-xl border-b border-gray-200/50 p-4 flex items-center justify-between md:hidden z-30 sticky top-0">
+          <span className="text-lg font-semibold tracking-tight text-black">
+            SisRiesgos
+          </span>
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
+            className="p-2 bg-white shadow-sm rounded-full text-gray-600 hover:text-black border border-gray-100"
           >
             <Menu size={20} />
           </button>
         </header>
 
         {/* Contenido Dinámico */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-12 scroll-smooth">
-          <div className="max-w-7xl mx-auto pb-12 animate-in fade-in duration-500">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
+          <div className="max-w-6xl mx-auto animate-in fade-in zoom-in-95 duration-500">
             {children}
           </div>
         </main>
+
       </div>
     </div>
   );
