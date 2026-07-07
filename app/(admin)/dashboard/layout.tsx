@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image"; // Importamos Image para el logo
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -50,51 +51,65 @@ export default function DashboardLayout({
     }
   };
 
+  // Definimos colores principales en el diseño
+  const colors = {
+    primary: "blue-600",
+    primaryHover: "blue-500",
+    dark: "gray-950",
+    darkAccent: "gray-900",
+    logout: "red-500",
+    white: "white",
+  };
+
   return (
-    <div className="min-h-screen bg-[#F5F5F7] flex font-sans antialiased selection:bg-blue-200 selection:text-blue-900">
-      {/* Overlay Móvil con efecto Glass */}
+    <div className={`min-h-screen bg-gray-50 flex font-sans selection:bg-${colors.primary}/20`}>
+      {/* Overlay Móvil con Efecto de Cristal */}
       <div
-        className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-500 md:hidden ${
+        className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity duration-500 md:hidden ${
           isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsSidebarOpen(false)}
       />
 
-      {/* Sidebar - Estilo macOS Dark Mode */}
+      {/* Sidebar - Estilo Premium Apple */}
       <aside
         className={`
-        fixed md:relative inset-y-0 left-0 z-50 w-[280px] bg-[#1C1C1E]/95 backdrop-blur-3xl text-gray-100 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col border-r border-white/10 shadow-2xl md:shadow-none
-        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        fixed md:relative inset-y-0 left-0 z-50 w-[280px] bg-gray-950/90 text-white transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col border-r border-gray-800/50 backdrop-blur-md rounded-r-3xl md:rounded-none md:translate-x-0
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
       `}
       >
-        {/* Logo y Cabecera del Sidebar */}
+        {/* Cabecera del Sidebar con Logo */}
         <div className="p-8 flex items-center justify-between">
-          <div>
-            <span className="text-xl font-semibold tracking-tight text-white flex items-center gap-2.5">
-              <div className="p-1.5 bg-blue-500/10 rounded-lg">
-                <ShieldCheck className="text-[#0A84FF]" size={22} />
-              </div>
-              Sistema Integral
-            </span>
-            <span className="block text-[10px] text-gray-400/80 uppercase tracking-widest mt-1.5 font-medium">
+          <div className="flex flex-col gap-3">
+            <div className="relative h-10 w-full flex items-center justify-center">
+              <Image 
+                src="/images/logo.png" // Ruta de tu logo
+                alt="Logo Sistema Integral"
+                width={160} // Ajusta el tamaño según tu logo
+                height={40}
+                className="object-contain"
+                priority // Carga prioritaria
+              />
+            </div>
+            <span className="block text-[10px] text-center text-gray-400 uppercase tracking-[0.25em] font-semibold">
               Admin Workspace
             </span>
           </div>
 
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="md:hidden p-2 rounded-full bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-colors active:scale-95"
+            className="md:hidden p-2 rounded-full bg-gray-900 text-white hover:text-blue-400 transition-colors"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Botón de Acción Principal (Call to Action) */}
-        <div className="px-5 mb-6">
+        {/* Botón Nuevo Registro - Premium */}
+        <div className="px-6 mb-8">
           <Link
             href="/dashboard/posts/new"
             onClick={() => setIsSidebarOpen(false)}
-            className="flex items-center justify-center gap-2 w-full bg-[#007AFF] hover:bg-[#0066CC] text-white py-3 rounded-2xl font-medium transition-all duration-300 shadow-[0_4px_14px_0_rgba(0,122,255,0.3)] hover:shadow-[0_6px_20px_rgba(0,122,255,0.4)] active:scale-[0.98] group"
+            className={`flex items-center justify-center gap-2.5 w-full bg-${colors.primary} hover:bg-${colors.primaryHover} text-white py-3 rounded-2xl font-medium transition-all duration-300 shadow-[0_10px_20px_rgba(37,99,235,0.2)] hover:shadow-[0_15px_25px_rgba(37,99,235,0.35)] hover:-translate-y-0.5 group`}
           >
             <PlusCircle
               size={18}
@@ -105,7 +120,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Navegación Principal */}
-        <nav className="px-3 space-y-1 flex-1">
+        <nav className="px-4 space-y-2 flex-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
 
@@ -114,55 +129,60 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 font-medium text-sm group ${
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 font-medium text-sm group ${
                   isActive
-                    ? "bg-[#007AFF] text-white shadow-sm"
-                    : "text-gray-400 hover:bg-white/10 hover:text-gray-100"
+                    ? "bg-white/10 text-white shadow-inner border border-white/5"
+                    : "text-gray-300 hover:bg-white/5 hover:text-white"
                 }`}
               >
                 <item.icon
                   size={18}
-                  className={isActive ? "text-white" : "text-gray-400 group-hover:text-gray-200 transition-colors"}
+                  className={`transition-colors duration-300 ${
+                    isActive ? `text-${colors.primary}` : "text-gray-400 group-hover:text-gray-100"
+                  }`}
                 />
                 <span>{item.name}</span>
+                {isActive && (
+                  <div className={`absolute right-4 w-1 h-1 bg-${colors.primary} rounded-full`}></div>
+                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Enlace de retorno al sitio */}
-        <div className="px-3 pb-2">
+        {/* Enlace Ir al Sitio Web */}
+        <div className="px-4 pb-4">
           <Link
             href="/"
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-white/10 hover:text-gray-100 transition-all font-medium text-sm group"
+            className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-300 hover:bg-white/5 hover:text-white transition-all font-medium text-sm border border-transparent hover:border-gray-800 group"
           >
             <Home
               size={18}
-              className="text-gray-400 group-hover:text-gray-200 transition-colors"
+              className="text-gray-400 group-hover:text-white transition-colors"
             />
             <span>Ir al Sitio Web</span>
           </Link>
         </div>
 
-        {/* Sección de Usuario y Logout */}
-        <div className="p-5 mx-3 mb-5 bg-white/[0.04] border border-white/[0.05] rounded-2xl mt-auto backdrop-blur-md">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-b from-gray-700 to-gray-900 border border-white/10 flex items-center justify-center text-white font-medium shadow-inner">
+        {/* Sección Usuario / Logout - Integrado */}
+        <div className="p-6 bg-gray-900/40 border-t border-gray-800/50 mt-auto backdrop-blur-sm rounded-t-3xl">
+          <div className="flex items-center gap-4 mb-6">
+            <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-${colors.primary} to-blue-700 flex items-center justify-center text-white font-bold shadow-lg border border-white/10`}>
               {mockUser.initial}
             </div>
 
             <div className="overflow-hidden">
-              <p className="text-sm font-semibold text-gray-100 truncate tracking-tight">
+              <p className="text-sm font-bold text-white truncate">
                 {mockUser.name}
               </p>
-              <p className="text-xs text-gray-400 truncate">{mockUser.email}</p>
+              <p className="text-xs text-gray-400 truncate tracking-tight">{mockUser.email}</p>
             </div>
           </div>
 
           <button
             onClick={handleSignOut}
             disabled={isLoggingOut}
-            className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-[#FF3B30]/10 text-gray-300 hover:text-[#FF3B30] py-2.5 rounded-xl transition-all duration-200 text-sm font-medium border border-transparent hover:border-[#FF3B30]/20 active:scale-[0.98] group disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full flex items-center justify-center gap-2 bg-gray-900/70 hover:bg-${colors.logout}/10 text-gray-200 hover:text-${colors.logout} py-3.5 rounded-2xl transition-all text-sm font-medium border border-gray-800 hover:border-${colors.logout}/20 group disabled:opacity-60 disabled:cursor-not-allowed`}
           >
             <LogOut
               size={16}
@@ -173,28 +193,30 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      {/* Contenido Principal */}
+      {/* Área de Contenido Principal */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Cabecera Móvil - Estilo iOS */}
-        <header className="bg-white/70 backdrop-blur-xl border-b border-gray-200/60 p-4 flex items-center justify-between md:hidden z-30 sticky top-0 supports-[backdrop-filter]:bg-white/50">
-          <span className="font-semibold tracking-tight text-[#1D1D1F] flex items-center gap-2">
-            <div className="p-1.5 bg-blue-50 rounded-lg">
-              <ShieldCheck className="text-[#007AFF]" size={18} />
-            </div>
-            Sistema Integral
-          </span>
+        {/* Cabecera Móvil - Transparente */}
+        <header className="bg-white/70 backdrop-blur-xl border-b border-gray-200/50 p-4 flex items-center justify-between md:hidden z-30 sticky top-0 supports-[backdrop-filter]:bg-white/50">
+          <div className="relative h-8 w-32">
+            <Image 
+              src="/images/logo.png" 
+              alt="Logo Sistema Integral"
+              fill
+              className="object-contain object-left"
+            />
+          </div>
 
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="p-2 bg-gray-100/80 rounded-full text-gray-600 hover:bg-gray-200 transition-colors active:scale-95"
+            className="p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
           >
             <Menu size={20} />
           </button>
         </header>
 
-        {/* Área de Trabajo */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth">
-          <div className="max-w-5xl mx-auto pb-12 animate-in fade-in duration-500">
+        {/* Contenido Dinámico */}
+        <main className="flex-1 overflow-y-auto p-6 md:p-12 scroll-smooth">
+          <div className="max-w-7xl mx-auto pb-12 animate-in fade-in duration-500">
             {children}
           </div>
         </main>
