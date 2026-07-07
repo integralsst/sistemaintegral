@@ -43,7 +43,7 @@ export default function DashboardLayout({
         method: "POST",
       });
 
-      router.push("/login");
+      router.push("/");
       router.refresh();
     } finally {
       setIsLoggingOut(false);
