@@ -30,9 +30,22 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
     
+    // Aquí está la magia: Extraemos SOLAMENTE los campos que existen en la base de datos
+    // Esto ignora el arreglo "tags" que manda el frontend y evita que Prisma colapse.
+    const { title, slug, excerpt, content, category, readTime, image, isFeatured } = body;
+    
     const updatedPost = await prisma.post.update({
       where: { id: parseInt(id) },
-      data: body,
+      data: {
+        title,
+        slug,
+        excerpt,
+        content,
+        category,
+        readTime,
+        image,
+        isFeatured
+      },
     });
 
     return NextResponse.json(updatedPost);
