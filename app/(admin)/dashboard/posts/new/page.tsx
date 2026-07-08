@@ -16,6 +16,19 @@ const AVAILABLE_TAGS = [
   "Estres laboral", "Trauma", "SST", "Riesgo psicosocial en el trabajo", "Manizales"
 ];
 
+// Configuración de SweetAlert2 con diseño Apple
+const appleAlert = Swal.mixin({
+  customClass: {
+    popup: 'rounded-[24px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white/95 backdrop-blur-xl border border-gray-100 p-6',
+    title: 'text-xl font-semibold text-gray-900 tracking-tight mt-1',
+    htmlContainer: 'text-sm text-gray-500 font-medium leading-relaxed mt-2',
+    confirmButton: 'bg-[#007AFF] hover:bg-[#0066CC] text-white rounded-xl px-8 py-3 font-medium transition-colors w-full sm:w-auto shadow-sm',
+    cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-xl px-8 py-3 font-medium transition-colors w-full sm:w-auto',
+    actions: 'flex gap-3 w-full justify-center mt-6',
+  },
+  buttonsStyling: false,
+});
+
 export default function NewPostPage() {
   const router = useRouter();
   
@@ -122,7 +135,7 @@ export default function NewPostPage() {
         setFormData((prev) => ({ ...prev, image: file.secure_url }));
       }
     } catch (error) {
-      Swal.fire({ icon: 'error', title: 'Error', text: 'Error al subir imagen' });
+      appleAlert.fire({ icon: 'error', title: 'Error de carga', text: 'No se pudo subir la imagen.' });
     } finally {
       setUploadingImage(false);
     }
@@ -132,17 +145,17 @@ export default function NewPostPage() {
     e.preventDefault();
     
     if (!formData.slug) {
-        Swal.fire({ icon: 'warning', title: 'Falta la URL', text: 'El slug es obligatorio para crear el artículo.' });
+        appleAlert.fire({ icon: 'warning', title: 'URL Incompleta', text: 'El slug es obligatorio para crear el artículo.' });
         return;
     }
 
     if (!formData.content || formData.content === "<p><br></p>") {
-        Swal.fire({ icon: 'warning', title: 'Falta contenido', text: 'El contenido no puede estar vacío.' });
+        appleAlert.fire({ icon: 'warning', title: 'Contenido Vacío', text: 'El cuerpo del artículo no puede estar vacío.' });
         return;
     }
 
     if (formData.tags.length === 0) {
-      Swal.fire({ icon: 'warning', title: 'Sin etiquetas', text: 'Selecciona al menos una etiqueta.' });
+      appleAlert.fire({ icon: 'warning', title: 'Sin Categorías', text: 'Selecciona al menos una etiqueta.' });
       return;
     }
 
@@ -165,21 +178,20 @@ export default function NewPostPage() {
         throw new Error(errorData.error || `Error ${res.status}: ${res.statusText}`);
       }
 
-      await Swal.fire({
+      await appleAlert.fire({
             icon: 'success',
             title: '¡Publicado!',
             text: 'Tu nuevo artículo ya está en línea.',
-            confirmButtonColor: '#007AFF',
-            confirmButtonText: 'Genial'
+            confirmButtonText: 'Continuar'
       });
       router.push("/dashboard/posts"); 
       router.refresh();
 
     } catch (error: any) {
       console.error(error);
-      Swal.fire({ 
+      appleAlert.fire({ 
         icon: 'error', 
-        title: 'Error al guardar', 
+        title: 'Error de Servidor', 
         text: error.message || 'No se pudo crear el artículo.' 
       });
     } finally {
@@ -189,8 +201,6 @@ export default function NewPostPage() {
 
   return (
     <div className="max-w-6xl mx-auto pb-24 px-4 sm:px-6">
-      
-      {/* HEADER TIPO MAC OS */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
         <div className="flex items-center gap-4">
             <Link href="/dashboard/posts" className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-full text-gray-500 hover:text-black hover:shadow-md transition-all">
@@ -214,12 +224,8 @@ export default function NewPostPage() {
       </div>
 
       <form className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* COLUMNA PRINCIPAL */}
         <div className="lg:col-span-8 space-y-6">
             <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-8">
-                
-                {/* Título */}
                 <div>
                     <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Título principal</label>
                     <input
@@ -232,8 +238,6 @@ export default function NewPostPage() {
                         required
                     />
                 </div>
-
-                {/* Slug */}
                 <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
                     <div className="flex items-center gap-2 mb-2">
                         <LinkIcon size={14} className="text-gray-400" />
@@ -250,8 +254,6 @@ export default function NewPostPage() {
                     />
                     <p className="text-[10px] text-gray-400 mt-2">Se auto-genera al escribir el título.</p>
                 </div>
-
-                {/* Resumen */}
                 <div>
                     <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Resumen para la tarjeta</label>
                     <textarea
@@ -266,7 +268,6 @@ export default function NewPostPage() {
                 </div>
             </div>
 
-            {/* Editor de Texto */}
             <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] min-h-[600px] flex flex-col">
                 <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-6">Cuerpo del artículo</label>
                 <div className="flex-1 h-full editor-container">
@@ -282,10 +283,7 @@ export default function NewPostPage() {
             </div>
         </div>
 
-        {/* COLUMNA LATERAL (SETTINGS) */}
         <div className="lg:col-span-4 space-y-6">
-            
-            {/* Tarjeta de Destacado (Estilo iOS Toggle) */}
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                 <div 
                     onClick={() => setFormData(prev => ({ ...prev, isFeatured: !prev.isFeatured }))}
@@ -300,17 +298,13 @@ export default function NewPostPage() {
                             <p className="text-[11px] text-gray-400 mt-0.5">Fijar al inicio del blog</p>
                         </div>
                     </div>
-                    {/* Toggle iOS */}
                     <div className={`w-12 h-7 rounded-full relative transition-colors duration-300 ${formData.isFeatured ? "bg-[#34C759]" : "bg-gray-200"}`}>
                         <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 ${formData.isFeatured ? "translate-x-6" : "translate-x-1"}`} />
                     </div>
                 </div>
             </div>
 
-            {/* Ajustes Generales */}
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-8">
-                
-                {/* Imagen */}
                 <div>
                     <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Portada del artículo</label>
                     <div className="relative w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 flex flex-col items-center justify-center transition-all group">
@@ -338,7 +332,6 @@ export default function NewPostPage() {
                     </div>
                 </div>
 
-                {/* Etiquetas (Chips) */}
                 <div>
                     <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
                         Etiquetas <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-1">{formData.tags.length}</span>
@@ -366,7 +359,6 @@ export default function NewPostPage() {
                     {formData.tags.length === 0 && <p className="text-[10px] text-red-400 mt-2">Selecciona al menos una etiqueta.</p>}
                 </div>
 
-                {/* Tiempo de lectura */}
                 <div>
                     <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Tiempo de Lectura</label>
                     <input 
@@ -383,7 +375,6 @@ export default function NewPostPage() {
         </div>
       </form>
       
-      {/* Estilos para limpiar Quill y hacerlo lucir nativo */}
       <style jsx global>{`
         .editor-container .ql-toolbar {
             border: none !important;
