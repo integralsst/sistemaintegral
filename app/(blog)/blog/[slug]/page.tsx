@@ -7,12 +7,14 @@ import { ArrowLeft, Calendar, Clock } from "lucide-react";
 export const revalidate = 60; // Revalida cada minuto para optimizar rendimiento
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function PostDetailPage({ params }: Props) {
+  const { slug } = await params;
+
   const post = await prisma.post.findUnique({
-    where: { slug: params.slug },
+    where: { slug: slug },
   });
 
   if (!post) {
@@ -72,9 +74,6 @@ export default async function PostDetailPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
       </div>
-
-    
-  
     </article>
   );
 }
