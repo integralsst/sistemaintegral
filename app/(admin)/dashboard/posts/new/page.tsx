@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Save, ArrowLeft, Loader2, UploadCloud, X, Check, Star, Link as LinkIcon } from "lucide-react";
+import { Save, ArrowLeft, Loader2, UploadCloud, Trash2, Check, Star, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -169,8 +169,8 @@ export default function NewPostPage() {
             icon: 'success',
             title: '¡Publicado!',
             text: 'Tu nuevo artículo ya está en línea.',
-            confirmButtonColor: '#0d9488',
-            confirmButtonText: 'Ir al listado'
+            confirmButtonColor: '#007AFF',
+            confirmButtonText: 'Genial'
       });
       router.push("/dashboard/posts"); 
       router.refresh();
@@ -188,110 +188,176 @@ export default function NewPostPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-20">
-      <div className="flex items-center gap-4 mb-8">
-        <Link href="/dashboard/posts" className="p-2 hover:bg-stone-200 rounded-full transition-colors text-stone-500">
-            <ArrowLeft size={20} />
-        </Link>
-        <div>
-            <h1 className="text-2xl font-serif font-bold text-stone-800">Crear Nuevo Artículo</h1>
-            <p className="text-stone-500 text-sm">Comparte tu conocimiento con el mundo</p>
+    <div className="max-w-6xl mx-auto pb-24 px-4 sm:px-6">
+      
+      {/* HEADER TIPO MAC OS */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+        <div className="flex items-center gap-4">
+            <Link href="/dashboard/posts" className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-full text-gray-500 hover:text-black hover:shadow-md transition-all">
+                <ArrowLeft size={18} />
+            </Link>
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Nuevo Artículo</h1>
+                <p className="text-gray-500 text-sm mt-0.5">Crea y comparte tu conocimiento</p>
+            </div>
+        </div>
+        <div className="flex items-center">
+            <button 
+                onClick={handleSubmit} 
+                disabled={loading || uploadingImage} 
+                className="px-6 py-2.5 w-full sm:w-auto bg-black hover:bg-gray-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all font-medium text-sm active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+                {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                Publicar Artículo
+            </button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
-                <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Título</label>
-                <input
-                    type="text"
-                    name="title"
-                    placeholder="Título del artículo..."
-                    className="w-full text-xl font-serif font-bold text-stone-800 placeholder:text-stone-300 border-none focus:ring-0 p-0"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required
-                />
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <LinkIcon size={14} className="text-stone-400" />
-                  <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider">URL del Artículo (Slug)</label>
+      <form className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* COLUMNA PRINCIPAL */}
+        <div className="lg:col-span-8 space-y-6">
+            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-8">
+                
+                {/* Título */}
+                <div>
+                    <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Título principal</label>
+                    <input
+                        type="text"
+                        name="title"
+                        placeholder="Escribe un título llamativo..."
+                        className="w-full text-3xl font-bold text-gray-900 placeholder:text-gray-300 border-none focus:ring-0 p-0 bg-transparent"
+                        value={formData.title}
+                        onChange={handleChange}
+                        required
+                    />
                 </div>
-                <input
-                    type="text"
-                    name="slug"
-                    placeholder="ej: como-superar-la-ansiedad"
-                    className="w-full text-sm font-mono text-teal-700 placeholder:text-stone-300 border-none focus:ring-0 p-0"
-                    value={formData.slug}
-                    onChange={handleChange}
-                    required
-                />
-                <p className="text-[10px] text-stone-400 mt-2">Se auto-genera al escribir el título. Puedes editarlo manualmente.</p>
+
+                {/* Slug */}
+                <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                    <div className="flex items-center gap-2 mb-2">
+                        <LinkIcon size={14} className="text-gray-400" />
+                        <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Enlace Permanente (Slug)</label>
+                    </div>
+                    <input
+                        type="text"
+                        name="slug"
+                        placeholder="ej: como-superar-la-ansiedad"
+                        className="w-full text-sm font-mono text-blue-600 placeholder:text-gray-300 border-none focus:ring-0 p-0 bg-transparent"
+                        value={formData.slug}
+                        onChange={handleChange}
+                        required
+                    />
+                    <p className="text-[10px] text-gray-400 mt-2">Se auto-genera al escribir el título.</p>
+                </div>
+
+                {/* Resumen */}
+                <div>
+                    <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Resumen para la tarjeta</label>
+                    <textarea
+                        name="excerpt"
+                        rows={3}
+                        placeholder="Una breve introducción de 2 o 3 líneas..."
+                        className="w-full text-gray-600 placeholder:text-gray-300 border-none focus:ring-0 p-0 bg-transparent resize-none leading-relaxed"
+                        value={formData.excerpt}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
-                <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Resumen (Texto plano)</label>
-                <textarea
-                    name="excerpt"
-                    rows={3}
-                    placeholder="Breve introducción para la tarjeta..."
-                    className="w-full text-stone-600 placeholder:text-stone-300 border-none focus:ring-0 p-0 resize-none"
-                    value={formData.excerpt}
-                    onChange={handleChange}
-                    required
-                />
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm min-h-[600px] flex flex-col resize-y overflow-hidden">
-                <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-4 border-b border-stone-100 pb-2">Contenido Principal</label>
-                <div className="flex-1 h-full flex flex-col">
+            {/* Editor de Texto */}
+            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] min-h-[600px] flex flex-col">
+                <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-6">Cuerpo del artículo</label>
+                <div className="flex-1 h-full editor-container">
                     <ReactQuill 
                         theme="snow" 
                         value={formData.content} 
                         onChange={handleEditorChange}
                         modules={modules}
-                        placeholder="Escribe aquí tu artículo completo..."
-                        className="h-full flex-1 mb-12" 
+                        placeholder="Comienza a escribir tu contenido aquí..."
+                        className="h-full flex-1 mb-12 border-none" 
                     />
                 </div>
             </div>
         </div>
 
-        <div className="space-y-6">
-            <div 
-                onClick={() => setFormData(prev => ({ ...prev, isFeatured: !prev.isFeatured }))}
-                className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between group ${
-                formData.isFeatured ? "bg-amber-50 border-amber-200 shadow-sm" : "bg-white border-stone-200 hover:border-stone-300"
-            }`}>
-                <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full ${formData.isFeatured ? "bg-amber-100 text-amber-600" : "bg-stone-100 text-stone-400"}`}>
-                        <Star size={18} fill={formData.isFeatured ? "currentColor" : "none"} />
+        {/* COLUMNA LATERAL (SETTINGS) */}
+        <div className="lg:col-span-4 space-y-6">
+            
+            {/* Tarjeta de Destacado (Estilo iOS Toggle) */}
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                <div 
+                    onClick={() => setFormData(prev => ({ ...prev, isFeatured: !prev.isFeatured }))}
+                    className="flex items-center justify-between cursor-pointer group"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-xl transition-colors ${formData.isFeatured ? "bg-amber-100 text-amber-500" : "bg-gray-100 text-gray-400"}`}>
+                            <Star size={18} fill={formData.isFeatured ? "currentColor" : "none"} />
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-gray-900">Destacar Artículo</p>
+                            <p className="text-[11px] text-gray-400 mt-0.5">Fijar al inicio del blog</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className={`text-sm font-bold ${formData.isFeatured ? "text-amber-800" : "text-stone-600"}`}>Destacar Artículo</p>
-                        <p className="text-[10px] text-stone-400">Aparecerá primero en el inicio</p>
+                    {/* Toggle iOS */}
+                    <div className={`w-12 h-7 rounded-full relative transition-colors duration-300 ${formData.isFeatured ? "bg-[#34C759]" : "bg-gray-200"}`}>
+                        <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 ${formData.isFeatured ? "translate-x-6" : "translate-x-1"}`} />
                     </div>
-                </div>
-                <div className={`w-10 h-5 rounded-full relative transition-colors ${formData.isFeatured ? "bg-amber-500" : "bg-stone-300"}`}>
-                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-all duration-300 ${formData.isFeatured ? "left-6" : "left-1"}`} />
                 </div>
             </div>
 
-            <button type="submit" disabled={loading || uploadingImage} className="w-full bg-stone-900 hover:bg-teal-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                {loading ? <Loader2 className="animate-spin" /> : <Save size={20} />}
-                Publicar
-            </button>
-
-            <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-4">
+            {/* Ajustes Generales */}
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-8">
+                
+                {/* Imagen */}
                 <div>
-                    <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-3">Etiquetas ({formData.tags.length})</label>
+                    <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Portada del artículo</label>
+                    <div className="relative w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 flex flex-col items-center justify-center transition-all group">
+                        {uploadingImage ? (
+                            <div className="flex flex-col items-center text-blue-500">
+                                <Loader2 className="animate-spin mb-2" />
+                                <span className="text-xs font-medium">Subiendo...</span>
+                            </div>
+                        ) : formData.image ? (
+                            <>
+                                <Image src={formData.image} alt="Preview" fill className="object-cover" />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button type="button" onClick={() => setFormData({ ...formData, image: "" })} className="bg-white/90 p-2 rounded-full text-red-500 shadow-lg hover:scale-110 transition-transform">
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <UploadCloud className="text-gray-300 mb-2 group-hover:text-blue-500 transition-colors" size={28} />
+                                <span className="text-xs font-medium text-gray-400 group-hover:text-blue-500">Subir imagen</span>
+                                <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* Etiquetas (Chips) */}
+                <div>
+                    <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
+                        Etiquetas <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-1">{formData.tags.length}</span>
+                    </label>
                     <div className="flex flex-wrap gap-2">
                         {AVAILABLE_TAGS.map((tag) => {
                             const isSelected = formData.tags.includes(tag);
                             return (
-                                <button key={tag} type="button" onClick={() => toggleTag(tag)} className={`text-xs px-3 py-1.5 rounded-full border transition-all flex items-center gap-1.5 ${isSelected ? "bg-teal-600 text-white border-teal-600 shadow-md" : "bg-stone-50 text-stone-600 border-stone-200 hover:border-teal-400"}`}>
+                                <button 
+                                    key={tag} 
+                                    type="button" 
+                                    onClick={() => toggleTag(tag)} 
+                                    className={`text-[11px] font-medium px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 border
+                                        ${isSelected 
+                                            ? "bg-blue-500 text-white border-blue-500 shadow-sm" 
+                                            : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                                        }
+                                    `}
+                                >
                                     {isSelected && <Check size={12} />} {tag}
                                 </button>
                             );
@@ -299,36 +365,47 @@ export default function NewPostPage() {
                     </div>
                     {formData.tags.length === 0 && <p className="text-[10px] text-red-400 mt-2">Selecciona al menos una etiqueta.</p>}
                 </div>
-                <div>
-                    <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Tiempo de Lectura</label>
-                    <input type="text" name="readTime" placeholder="Ej: 5 min" className="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 text-stone-700 focus:outline-none focus:border-teal-500" value={formData.readTime} onChange={handleChange} required />
-                </div>
-            </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm">
-                <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-4">Imagen Destacada</label>
-                <div className="relative w-full aspect-video bg-stone-50 rounded-lg overflow-hidden border border-stone-200 border-dashed flex flex-col items-center justify-center group mb-4">
-                    {uploadingImage ? (
-                        <div className="flex flex-col items-center text-teal-600 animate-pulse"><Loader2 className="animate-spin mb-2" /><span className="text-xs font-bold">Subiendo...</span></div>
-                    ) : formData.image ? (
-                        <>
-                            <Image src={formData.image} alt="Preview" fill className="object-cover" />
-                            <button type="button" onClick={() => setFormData({ ...formData, image: "" })} className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full text-red-500 shadow-sm hover:bg-white"><X size={16} /></button>
-                        </>
-                    ) : (
-                        <>
-                            <UploadCloud className="text-stone-300 mb-2 group-hover:text-teal-500 transition-colors" size={32} />
-                            <span className="text-xs text-stone-400 group-hover:text-stone-600">Clic para subir imagen</span>
-                            <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
-                        </>
-                    )}
+                {/* Tiempo de lectura */}
+                <div>
+                    <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Tiempo de Lectura</label>
+                    <input 
+                        type="text" 
+                        name="readTime" 
+                        placeholder="Ej: 5 min"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" 
+                        value={formData.readTime} 
+                        onChange={handleChange} 
+                        required 
+                    />
                 </div>
-                <p className="text-[10px] text-stone-400 text-center">Formatos: JPG, PNG, WEBP.</p>
             </div>
         </div>
       </form>
       
+      {/* Estilos para limpiar Quill y hacerlo lucir nativo */}
       <style jsx global>{`
+        .editor-container .ql-toolbar {
+            border: none !important;
+            border-bottom: 1px solid #f3f4f6 !important;
+            border-radius: 1.5rem 1.5rem 0 0 !important;
+            padding: 1rem !important;
+            background: #fafafa;
+        }
+        .editor-container .ql-container {
+            border: none !important;
+            font-family: inherit !important;
+            font-size: 1rem !important;
+        }
+        .editor-container .ql-editor {
+            padding: 1.5rem 0 !important;
+            color: #374151;
+            min-height: 500px;
+        }
+        .editor-container .ql-editor::before {
+            color: #d1d5db !important;
+            font-style: normal !important;
+        }
         .ql-editor .ql-align-justify { text-align: justify; text-justify: inter-word; }
         .ql-editor li.ql-align-justify { text-align: justify; }
         .ql-editor .ql-indent-1 { padding-left: 3em; }
