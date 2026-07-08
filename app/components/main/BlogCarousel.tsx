@@ -51,7 +51,13 @@ export default function BlogCarousel() {
       .then(res => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
-            setPosts(data);
+            // Ordenamiento estructurado: destacados primero, luego el resto
+            const sortedPosts = data.sort((a, b) => {
+                if (a.isFeatured && !b.isFeatured) return -1;
+                if (!a.isFeatured && b.isFeatured) return 1;
+                return 0;
+            });
+            setPosts(sortedPosts);
         }
         setLoading(false);
       })
@@ -129,7 +135,6 @@ export default function BlogCarousel() {
                         1024: { slidesPerView: 3 },
                     }}
                     loop={posts.length > 3}
-                    // !pb-16 es vital para que la sombra inferior no se corte por el overflow del swiper
                     className="!pb-16 !pt-4 px-2 -mx-2 w-full" 
                 >
                 {posts.map((post: Post) => {
@@ -151,7 +156,7 @@ export default function BlogCarousel() {
                         <SwiperSlide key={post.id} className="h-auto">
                             {/* ENLACE ENVOLVENTE COMPLETO */}
                             <Link href={`/blog/${post.slug || post.id}`} className="group block h-full focus:outline-none">
-                                <article className={`h-full flex flex-col bg-white rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 border border-gray-100 relative hover:-translate-y-1`}>
+                                <article className={`h-full flex flex-col bg-white rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 border relative hover:-translate-y-1 ${post.isFeatured ? 'border-[#FF9500]/30' : 'border-gray-100'}`}>
                                     
                                     {/* CONTENEDOR DE IMAGEN */}
                                     <div className="relative h-56 overflow-hidden bg-gray-50 border-b border-gray-50">
@@ -176,7 +181,7 @@ export default function BlogCarousel() {
                                                 </span>
                                             ))}
                                             {tags.length > 2 && (
-                                                <span className="bg-black/70 backdrop-blur-md px-2 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm">
+                                                <span className="bg-black/70 backdrop-blur-md px-2 py-1.5 rounded-full text-[11px] font-bold text-white shadow-sm border border-white/10 uppercase tracking-wider">
                                                     +{tags.length - 2}
                                                 </span>
                                             )}
@@ -184,7 +189,7 @@ export default function BlogCarousel() {
 
                                         {/* ESTRELLA DE DESTACADO */}
                                         {post.isFeatured && (
-                                            <span className="absolute top-4 right-4 z-20 bg-[#FF9500] text-white p-2 rounded-full shadow-md" title="Artículo Destacado">
+                                            <span className="absolute top-4 right-4 z-20 bg-[#FF9500] text-white p-2 rounded-full shadow-md animate-in fade-in zoom-in duration-300" title="Artículo Destacado">
                                                 <Star size={14} fill="currentColor" />
                                             </span>
                                         )}
@@ -212,9 +217,11 @@ export default function BlogCarousel() {
                                         </p>
 
                                         {/* BOTÓN FANTASMA TIPO IOS */}
-                                        <div className="flex items-center text-[#007AFF] font-semibold text-sm mt-auto">
-                                            Leer artículo
-                                            <ArrowRight size={16} className="ml-1.5 transition-transform duration-300 group-hover:translate-x-1" />
+                                        <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-xs font-semibold text-gray-400 uppercase tracking-wider mt-auto">
+                                            <div className="text-[#007AFF] flex items-center gap-1.5">
+                                                Leer artículo
+                                                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                            </div>
                                         </div>
                                     </div>
                                 </article>
