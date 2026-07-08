@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import {prisma} from "@/lib/prisma"; // Ajusta la ruta a tu instancia de Prisma
+import { prisma } from "@/lib/prisma"; 
 
 export async function GET() {
   try {
@@ -9,10 +9,15 @@ export async function GET() {
       },
       select: {
         id: true,
+        slug: true,
         title: true,
+        excerpt: true,
+        image: true,
         category: true,
+        readTime: true,
         createdAt: true,
-        // No traemos el content aquí para que la tabla cargue muy rápido
+        isFeatured: true,
+        // Omitimos 'content' intencionalmente para que el payload sea ligero y cargue rápido
       }
     });
 
