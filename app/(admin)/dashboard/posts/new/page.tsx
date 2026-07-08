@@ -11,12 +11,12 @@ import "react-quill-new/dist/quill.snow.css";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false }) as any;
 
+// Etiquetas actualizadas al contexto SG-SST y normativo
 const AVAILABLE_TAGS = [
-  "Psicología", "Psicoterapia", "Ansiedad", "Depresión", "Estrés",
-  "Estres laboral", "Trauma", "SST", "Riesgo psicosocial en el trabajo", "Manizales"
+  "SG-SST", "Normativa", "Resolución 0312", "Decreto 1072", "Riesgos Laborales",
+  "Salud Ocupacional", "Prevención", "Copasst", "Auditoría", "Bienestar Laboral"
 ];
 
-// Configuración de SweetAlert2 con diseño Apple
 const appleAlert = Swal.mixin({
   customClass: {
     popup: 'rounded-[24px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white/95 backdrop-blur-xl border border-gray-100 p-6',

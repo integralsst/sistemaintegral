@@ -11,12 +11,12 @@ import "react-quill-new/dist/quill.snow.css";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false }) as any;
 
+// Etiquetas actualizadas al contexto SG-SST y normativo
 const AVAILABLE_TAGS = [
-  "Psicología", "Psicoterapia", "Ansiedad", "Depresión", "Estrés",
-  "Estres laboral", "Trauma", "SST", "Riesgo psicosocial en el trabajo", "Manizales"
+  "SG-SST", "Normativa", "Resolución 0312", "Decreto 1072", "Riesgos Laborales",
+  "Salud Ocupacional", "Prevención", "Copasst", "Auditoría", "Bienestar Laboral"
 ];
 
-// 1. Extraemos las clases base para evitar errores de tipado (TypeScript ts(2339))
 const baseCustomClass = {
   popup: 'rounded-[24px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] bg-white/95 backdrop-blur-xl border border-gray-100 p-6',
   title: 'text-xl font-semibold text-gray-900 tracking-tight mt-1',
@@ -26,7 +26,6 @@ const baseCustomClass = {
   actions: 'flex gap-3 w-full justify-center mt-6',
 };
 
-// Configuración de SweetAlert2 con diseño Apple
 const appleAlert = Swal.mixin({
   customClass: baseCustomClass,
   buttonsStyling: false,
@@ -230,7 +229,6 @@ export default function EditPostPage() {
         showCancelButton: true,
         confirmButtonText: 'Eliminar',
         cancelButtonText: 'Cancelar',
-        // 2. Usamos el objeto baseCustomClass directamente
         customClass: {
             ...baseCustomClass,
             confirmButton: 'bg-[#FF3B30] hover:bg-[#D70015] text-white rounded-xl px-8 py-3 font-medium transition-colors w-full sm:w-auto shadow-sm',
