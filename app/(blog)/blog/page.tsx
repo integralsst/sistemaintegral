@@ -26,17 +26,17 @@ export default async function BlogIndex() {
     <main className="min-h-screen bg-[#F5F5F7] pb-24 pt-32 selection:bg-[#007AFF] selection:text-white">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         
-        {/* Header (Apple Design) */}
+        {/* Header (Apple Design con lenguaje SST y Normativo) */}
         <div className="mb-16">
           <Link href="/" className="inline-flex items-center text-gray-500 hover:text-black transition-colors mb-8 group font-medium text-sm">
             <ArrowLeft size={16} className="mr-2 group-hover:-translate-x-1 transition-transform" />
             Volver al inicio
           </Link>
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
-            Bitácora Terapéutica.
+            Actualidad y Normativa SST.
           </h1>
           <p className="text-gray-500 text-lg md:text-xl font-medium max-w-2xl leading-relaxed">
-            Un espacio de reflexión sobre psicología integral, trauma y bienestar emocional.
+            Recursos, guías prácticas y actualizaciones sobre el Sistema de Gestión de Seguridad y Salud en el Trabajo.
           </p>
         </div>
 
@@ -124,7 +124,7 @@ export default async function BlogIndex() {
 
           {posts.length === 0 && (
             <div className="col-span-full text-center py-24 bg-white rounded-[24px] border border-gray-200 border-dashed">
-                <p className="text-gray-500 font-medium text-lg">Aún no hay artículos publicados en la bitácora.</p>
+                <p className="text-gray-500 font-medium text-lg">Aún no hay artículos o guías normativas publicadas.</p>
             </div>
           )}
         </div>
