@@ -1,38 +1,71 @@
 import { FileText, TrendingUp, Activity } from "lucide-react";
-import ReviewWidget from "../../components/admin/ReviewWidget"; 
+import { prisma } from "@/lib/prisma"; // Importación directa de la base de datos
 import PostsChart from "../../components/admin/PostsChart"; 
 
-export default function AdminDashboard() {
+// 1. Convertimos el componente en asíncrono para permitir consultas a la base de datos
+export default async function AdminDashboard() {
   
-  // Datos estáticos (Mock Data)
-  const stats = {
-    postsCount: 42,
-    reviewCount: 88,
-    chartData: [
-      { name: "Ene", posts: 4, month: 0, year: 2026 },
-      { name: "Feb", posts: 7, month: 1, year: 2026 },
-      { name: "Mar", posts: 5, month: 2, year: 2026 },
-      { name: "Abr", posts: 12, month: 3, year: 2026 },
-      { name: "May", posts: 9, month: 4, year: 2026 },
-      { name: "Jun", posts: 15, month: 5, year: 2026 },
-    ]
-  };
+  // 2. Consulta 1: Conteo total de artículos publicados
+  const totalPostsCount = await prisma.post.count();
+
+  // 3. Consulta 2: Obtener la actividad de los últimos 6 meses
+  const currentDate = new Date();
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(currentDate.getMonth() - 5);
+  sixMonthsAgo.setDate(1); // Normalizar al primer día del mes
+  sixMonthsAgo.setHours(0, 0, 0, 0);
+
+  // Traemos solo la fecha de creación para no saturar la memoria
+  const recentPosts = await prisma.post.findMany({
+    where: {
+      createdAt: {
+        gte: sixMonthsAgo,
+      },
+    },
+    select: {
+      createdAt: true,
+    },
+  });
+
+  // 4. Lógica de agrupación: Construir el arreglo para el gráfico (últimos 6 meses)
+  const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  const dynamicChartData = [];
+
+  for (let i = 5; i >= 0; i--) {
+    const targetDate = new Date();
+    targetDate.setMonth(currentDate.getMonth() - i);
+    const targetMonth = targetDate.getMonth();
+    const targetYear = targetDate.getFullYear();
+    
+    // Filtramos cuántos artículos coinciden con este mes y año específico
+    const monthlyCount = recentPosts.filter((post) => {
+      const postDate = new Date(post.createdAt);
+      return postDate.getMonth() === targetMonth && postDate.getFullYear() === targetYear;
+    }).length;
+
+    dynamicChartData.push({
+      name: monthNames[targetMonth],
+      posts: monthlyCount,
+      month: targetMonth,
+      year: targetYear,
+    });
+  }
 
   return (
     <div className="animate-in fade-in zoom-in-95 duration-700">
       
-      {/* Cabecera - Tipografía limpia y márgenes generosos */}
+      {/* Cabecera - Contexto SST */}
       <header className="mb-10 px-2">
         <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2 tracking-tight">
-            Panel de Control
+            Panel de Control SG-SST
         </h1>
         <p className="text-gray-500 text-sm md:text-base font-medium">
-            Gestiona la plataforma y visualiza las métricas del sistema.
+            Supervisión centralizada de registros, guías y normativa vigente.
         </p>
       </header>
 
-      {/* GRID DE MÉTRICAS - Estilo Glassmorphism / Widgets */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* GRID DE MÉTRICAS - Ajustado a 2 columnas tras eliminar la satisfacción */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         
         {/* Card 1: Artículos Totales */}
         <div className="bg-white/70 backdrop-blur-2xl p-7 rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center gap-6 relative overflow-hidden group transition-all duration-500">
@@ -41,24 +74,17 @@ export default function AdminDashboard() {
           </div>
           <div className="relative z-10">
             <p className="text-gray-400 text-[10px] font-semibold uppercase tracking-widest mb-1">
-              Total Registros
+              Documentación Publicada
             </p>
             <p className="text-4xl font-semibold text-gray-900 tracking-tight">
-              {stats.postsCount}
+              {totalPostsCount}
             </p>
           </div>
           {/* Brillo sutil de fondo */}
           <div className="absolute right-0 top-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none transition-opacity group-hover:opacity-100 opacity-50"></div>
         </div>
 
-        {/* Card 2: Widget Dinámico 
-            Mantenemos el componente intacto pero actualizamos su contenedor 
-        */}
-        <div className="bg-white/70 backdrop-blur-2xl rounded-3xl overflow-hidden border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col justify-center">
-            <ReviewWidget initialCount={stats.reviewCount} />
-        </div>
-
-        {/* Card 3: Estado del Sistema */}
+        {/* Card 2: Estado del Sistema */}
         <div className="bg-white/70 backdrop-blur-2xl p-7 rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex items-center gap-6 relative overflow-hidden group transition-all duration-500">
             <div className="relative z-10 w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-gray-700 shadow-sm border border-gray-100 group-hover:scale-105 transition-transform duration-500">
                 <Activity size={24} strokeWidth={1.5} />
@@ -67,10 +93,10 @@ export default function AdminDashboard() {
             </div>
             <div className="relative z-10">
                 <p className="text-gray-400 text-[10px] font-semibold uppercase tracking-widest mb-1">
-                  Base de Datos
+                  Estado Operativo
                 </p>
                 <p className="text-xl font-semibold text-gray-900 tracking-tight">
-                  En Línea
+                  Sistema en Línea
                 </p>
             </div>
         </div>
@@ -82,22 +108,22 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between mb-8">
             <div>
                 <h2 className="text-xl font-semibold text-gray-900 tracking-tight">
-                  Actividad del Sistema
+                  Actividad de Publicaciones
                 </h2>
                 <p className="text-sm text-gray-500 mt-1 font-medium">
-                  Registros procesados durante los últimos 6 meses.
+                  Volumen de guías normativas registradas durante los últimos 6 meses.
                 </p>
             </div>
             {/* Badge de estado estilo píldora */}
             <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 bg-blue-50/80 backdrop-blur-sm text-blue-600 rounded-full border border-blue-100/50 text-xs font-semibold shadow-sm">
                 <TrendingUp size={14} strokeWidth={2.5} />
-                <span>Activo</span>
+                <span>Actualizado</span>
             </div>
         </div>
         
-        {/* Gráfico */}
+        {/* Gráfico conectado a los datos dinámicos */}
         <div className="relative w-full">
-          <PostsChart data={stats.chartData} />
+          <PostsChart data={dynamicChartData} />
         </div>
       </div>
 
