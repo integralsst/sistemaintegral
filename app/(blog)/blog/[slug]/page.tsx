@@ -73,17 +73,8 @@ export default async function PostDetailPage({ params }: Props) {
         />
       </div>
 
-      {/* Estilos globales básicos para asegurar que las alineaciones y justificados de Quill se respeten en producción */}
-      <style jsx global>{`
-        .markdown-body .ql-align-justify { text-align: justify; text-justify: inter-word; }
-        .markdown-body .ql-align-center { text-align: center; }
-        .markdown-body .ql-align-right { text-align: right; }
-        .markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
-        .markdown-body ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
-        .markdown-body p { margin-bottom: 1.25rem; font-size: 1.05rem; line-height: 1.75; }
-        .markdown-body h2 { font-size: 1.75rem; margin-top: 2rem; margin-bottom: 1rem; color: #1c1917; }
-        .markdown-body h3 { font-size: 1.4rem; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #1c1917; }
-      `}</style>
+    
+  
     </article>
   );
 }
