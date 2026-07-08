@@ -1,88 +1,321 @@
-import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+"use client"; // Es necesario hacerlo client component por el botón de compartir interactivo
+
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import { notFound, useParams } from "next/navigation";
+import { ArrowLeft, Calendar, Clock, Share } from "lucide-react";
 
-export const revalidate = 60; 
+// Como ahora es 'use client', no podemos importar Prisma directamente.
+// Necesitaremos hacer un fetch al backend.
 
-interface Props {
-  params: Promise<{ slug: string }>;
-}
+export default function PostDetailPage() {
+  const params = useParams();
+  const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
 
-export default async function PostDetailPage({ params }: Props) {
-  const { slug } = await params;
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Busca por slug, o como fallback por ID si es un número (para evitar 404s en posts viejos)
-  const post = await prisma.post.findFirst({
-    where: {
-      OR: [
-        { slug: slug },
-        ...(isNaN(Number(slug)) ? [] : [{ id: Number(slug) }])
-      ]
-    },
-  });
+  useEffect(() => {
+    if (!slug) return;
+
+    // Llamamos a la API para obtener los datos del artículo
+    const fetchPost = async () => {
+      try {
+        const res = await fetch(`/api/posts/${slug}`);
+        if (!res.ok) {
+           setLoading(false);
+           return;
+        }
+        const data = await res.json();
+        setPost(data);
+      } catch (error) {
+        console.error("Error cargando post:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [slug]);
+
+  if (loading) {
+      return (
+          <div className="min-h-screen flex items-center justify-center bg-[#F5F5F7]">
+              <div className="animate-pulse flex flex-col items-center">
+                  <div className="w-12 h-12 border-4 border-gray-200 border-t-[#007AFF] rounded-full animate-spin"></div>
+                  <span className="mt-4 text-gray-500 font-medium">Cargando artículo...</span>
+              </div>
+          </div>
+      )
+  }
 
   if (!post) {
-    notFound();
+      return notFound();
   }
+
+  const formattedDate = new Intl.DateTimeFormat('es-CO', {
+    dateStyle: 'long'
+  }).format(new Date(post.createdAt));
+
+  // Limpieza de HTML proveniente de Quill
+  const cleanContent = post.content
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\u00a0/g, ' ')
+    .replace(/href=(["'])www\./g, 'href=$1https://www.')
+    .replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
 
   let tags: string[] = [];
   try {
-    tags = JSON.parse(post.category);
-  } catch {
-    tags = [post.category];
+    if (post.category && post.category.startsWith("[")) {
+        tags = JSON.parse(post.category);
+    } else {
+        tags = [post.category || "General"];
+    }
+  } catch (e) {
+    tags = [post.category || "General"];
   }
 
+  // --- LÓGICA DEL BOTÓN DE COMPARTIR INTEGRADO ---
+  const handleShare = async () => {
+      const shareData = {
+          title: post.title,
+          text: post.excerpt,
+          url: window.location.href
+      };
+
+      if (navigator.share) {
+          try {
+              await navigator.share(shareData);
+          } catch (err) {
+              console.log("Error al compartir:", err);
+          }
+      } else {
+          // Fallback para navegadores de escritorio antiguos
+          navigator.clipboard.writeText(window.location.href);
+          alert("Enlace copiado al portapapeles");
+      }
+  };
+
   return (
-    <article className="min-h-screen bg-white pb-24">
+    <article className="min-h-screen bg-[#F5F5F7] pb-24 font-sans selection:bg-[#007AFF] selection:text-white">
       
-      {/* Cabecera Minimalista */}
-      <div className="w-full bg-[#F5F5F7] border-b border-gray-200/50 pt-20 pb-16 mb-12">
-        <div className="max-w-3xl mx-auto px-6">
-          <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-black transition-colors mb-10">
-            <ArrowLeft size={16} /> Volver al inicio
-          </Link>
-          
-          <div className="flex flex-wrap gap-2 mb-6">
-            {tags.map((tag, idx) => (
-              <span key={idx} className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 bg-gray-200/50 text-gray-700 rounded-lg">
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight mb-8">
-            {post.title}
-          </h1>
-
-          <div className="flex items-center gap-6 text-sm text-gray-500 font-medium uppercase tracking-wider">
-            <span className="flex items-center gap-2"><Calendar size={16} className="text-gray-400" /> {new Date(post.createdAt).toLocaleDateString()}</span>
-            <span className="flex items-center gap-2"><Clock size={16} className="text-gray-400" /> {post.readTime || "5 min"} de lectura</span>
-          </div>
+      {/* HERO SECTION (Estilo Apple News) */}
+      <div className="relative w-full h-[60vh] min-h-[500px] bg-[#1D1D1F] overflow-hidden">
+        {post.image ? (
+            <Image 
+                src={post.image} 
+                alt={post.title} 
+                fill 
+                className="object-cover opacity-60 scale-105 animate-[subtle-zoom_20s_ease-in-out_infinite_alternate]"
+                priority
+            />
+        ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black"></div>
+        )}
+        
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1D1D1F] via-[#1D1D1F]/40 to-transparent flex flex-col justify-end pb-20 md:pb-32">
+            <div className="max-w-4xl mx-auto px-6 w-full">
+                <Link href="/blog" className="inline-flex items-center text-white/70 hover:text-white mb-8 transition-colors text-xs font-semibold uppercase tracking-widest backdrop-blur-md bg-black/20 px-4 py-2 rounded-full border border-white/10">
+                    <ArrowLeft size={16} className="mr-2" />
+                    Volver a los artículos
+                </Link>
+                
+                <div className="flex flex-wrap items-center gap-4 mb-5">
+                    <div className="flex gap-2 flex-wrap">
+                        {tags.map((tag, i) => (
+                            <span key={i} className="bg-[#007AFF] text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm">
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                    <span className="flex items-center gap-2 text-gray-300 text-[11px] font-semibold uppercase tracking-wider pl-4 border-l border-gray-500/50">
+                        <Clock size={14} className="text-gray-400" /> 
+                        {post.readTime || "5 min"} de lectura
+                    </span>
+                </div>
+                
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight drop-shadow-lg">
+                    {post.title}
+                </h1>
+            </div>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6">
-        
-        {/* Imagen Principal */}
-        {post.image && (
-          <div className="relative w-full aspect-[21/9] rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mb-16">
-            <Image src={post.image} alt={post.title} fill className="object-cover" priority />
-          </div>
-        )}
+      {/* CONTENIDO PRINCIPAL (Tarjeta flotante estilo iOS) */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-16 relative z-10">
+        <div className="bg-white rounded-[32px] shadow-[0_20px_40px_rgba(0,0,0,0.08)] p-6 sm:p-10 md:p-16 border border-gray-100">
+            
+            {post.excerpt && (
+                <div className="text-xl md:text-2xl text-[#86868B] font-medium mb-12 pb-8 border-b border-gray-100 leading-relaxed tracking-tight">
+                    {post.excerpt}
+                </div>
+            )}
+            
+            <div 
+                className="safe-content relative z-20" 
+                dangerouslySetInnerHTML={{ __html: cleanContent }} 
+            />
 
-        {/* Resumen */}
-        <p className="text-xl md:text-2xl text-gray-500 font-medium leading-relaxed mb-12">
-          {post.excerpt}
-        </p>
-
-        {/* Cuerpo del Artículo (Tipografía optimizada) */}
-        <div 
-          className="prose prose-lg max-w-none text-gray-700 prose-headings:font-bold prose-headings:text-gray-900 prose-headings:tracking-tight prose-a:text-[#007AFF] prose-img:rounded-2xl"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+            <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-6 relative z-20">
+                <div className="flex items-center gap-2 text-[#86868B] font-medium text-sm">
+                    <Calendar size={18} className="text-gray-400"/>
+                    <span>Publicado el {formattedDate}</span>
+                </div>
+                
+                {/* BOTÓN COMPARTIR INTEGRADO */}
+                <button 
+                    onClick={handleShare}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-gray-50 hover:bg-gray-100 text-[#007AFF] font-medium text-sm rounded-full transition-colors active:scale-95 border border-gray-200"
+                >
+                    <Share size={16} />
+                    Compartir Artículo
+                </button>
+            </div>
+        </div>
       </div>
+
+      {/* HOJA DE ESTILOS INYECTADA (Modificada para diseño Apple) */}
+      <style>{`
+        /* Animación sutil para la imagen de cabecera */
+        @keyframes subtle-zoom {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        /* Tipografía y layout base */
+        .safe-content {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 1.1875rem; /* 19px, tamaño estándar lectura Apple */
+            line-height: 1.6; 
+            color: #1D1D1F;
+            width: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .safe-content * {
+            word-break: normal !important;
+            overflow-wrap: break-word !important;
+            white-space: normal !important; 
+        }
+
+        /* Párrafos */
+        .safe-content p { 
+            margin-bottom: 1.25rem !important; 
+            min-height: 1.2rem; 
+            text-align: left !important;
+            color: #1D1D1F;
+        }
+
+        /* Sangrías de Quill */
+        .safe-content .ql-indent-1 { padding-left: 2rem !important; }
+        .safe-content .ql-indent-2 { padding-left: 4rem !important; }
+        .safe-content .ql-indent-3 { padding-left: 6rem !important; }
+
+        /* Listas */
+        .safe-content ul, .safe-content ol {
+            margin-bottom: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .safe-content ul, 
+        .safe-content ol,
+        .safe-content li {
+            list-style: none !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        .safe-content li {
+            position: relative; 
+            margin-bottom: 0.5rem; 
+            padding-left: 1.5rem !important;
+            text-align: left !important;
+        }
+
+        .safe-content li.ql-indent-1 { padding-left: 3.5rem !important; }
+        .safe-content li.ql-indent-2 { padding-left: 5.5rem !important; }
+
+        /* Listas Ordenadas (Números) */
+        .safe-content ol { counter-reset: list-counter; }
+        .safe-content ol > li { counter-increment: list-counter; }
+        .safe-content ol > li::before {
+            content: counter(list-counter) ".";
+            position: absolute; left: 0; top: 0; width: 1.5rem; 
+            text-align: left;
+            color: #86868B; font-weight: 600; font-size: 1rem;
+        }
+
+        /* Listas Desordenadas (Viñetas) */
+        .safe-content ul > li::before {
+            content: '•';
+            position: absolute; left: 0; top: -2px;
+            color: #007AFF; font-size: 1.5em; font-weight: bold;
+        }
+        .safe-content li.ql-indent-1::before { content: '◦' !important; font-weight: 600; color: #86868B; }
+
+        /* Sublistas anidadas - Lógica de limpieza */
+        .safe-content li:has(> ol), .safe-content li:has(> ul) {
+            padding-left: 0 !important; margin-bottom: 0 !important;
+        }
+        .safe-content li:has(> ol)::before, .safe-content li:has(> ul)::before {
+            content: none !important; counter-increment: none !important; 
+        }
+
+        /* Encabezados (Titles) */
+        .safe-content h1, .safe-content h2, .safe-content h3 {
+            font-family: inherit; font-weight: 700; color: #1D1D1F;
+            letter-spacing: -0.02em;
+            margin-top: 2.5rem; margin-bottom: 1rem; line-height: 1.2; 
+            text-align: left !important;
+        }
+        
+        .safe-content h2 { font-size: 1.75rem; }
+        .safe-content h3 { font-size: 1.35rem; }
+
+        /* Citas (Blockquote estilo iOS Note) */
+        .safe-content blockquote {
+            border-left: 4px solid #007AFF; 
+            background: #F5F5F7;
+            padding: 1.25rem 1.5rem; 
+            margin: 2rem 0; 
+            border-radius: 0 16px 16px 0;
+            font-style: normal; 
+            font-weight: 500;
+            color: #1D1D1F;
+        }
+
+        /* Imágenes insertadas dentro del post */
+        .safe-content img {
+            max-width: 100%; height: auto; 
+            border-radius: 16px; 
+            margin: 2rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #f0f0f0;
+        }
+
+        /* Enlaces */
+        .safe-content a {
+            color: #007AFF !important; 
+            text-decoration: none !important; 
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .safe-content a:hover {
+            color: #0056b3 !important;
+            text-decoration: underline !important;
+        }
+        
+        /* Negritas */
+        .safe-content strong, .safe-content b {
+            font-weight: 600; color: #1D1D1F;
+        }
+
+        /* Alineaciones forzadas por Quill */
+        .safe-content .ql-align-center { text-align: center !important; }
+        .safe-content .ql-align-right { text-align: right !important; }
+        .safe-content .ql-align-justify { text-align: justify !important; }
+      `}</style>
     </article>
   );
 }
