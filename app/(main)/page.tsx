@@ -6,6 +6,7 @@ import ProcessSteps from "../components/main/ProcessSteps";
 import PainPoints from "../components/main/PainPoints";
 import StatsBanner from "../components/main/StatsBanner";
 import FaqSection from "../components/main/FaqSection";
+import BlogCarousel from "../components/main/BlogCarousel";
 
 export default function Home() {
   return (
@@ -25,6 +26,8 @@ export default function Home() {
       
       {/* Resolución de objeciones */}
       <FaqSection />
+
+      <BlogCarousel/>
       
     </main>
   );
