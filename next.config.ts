@@ -1,11 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Agrega este bloque para autorizar las calidades
   images: {
-    qualities: [75, 100],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+    ],
   },
-  // Si tienes otras configuraciones aquí (como reactStrictMode), mantenlas.
+  /* Aquí puedes mantener o agregar otras configuraciones como reactStrictMode si lo requieres */
 };
 
 export default nextConfig;
