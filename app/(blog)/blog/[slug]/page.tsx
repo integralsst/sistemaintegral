@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 
-export const revalidate = 60; // Revalida cada minuto para optimizar rendimiento
+export const revalidate = 60; 
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -13,8 +13,14 @@ interface Props {
 export default async function PostDetailPage({ params }: Props) {
   const { slug } = await params;
 
-  const post = await prisma.post.findUnique({
-    where: { slug: slug },
+  // Busca por slug, o como fallback por ID si es un número (para evitar 404s en posts viejos)
+  const post = await prisma.post.findFirst({
+    where: {
+      OR: [
+        { slug: slug },
+        ...(isNaN(Number(slug)) ? [] : [{ id: Number(slug) }])
+      ]
+    },
   });
 
   if (!post) {
@@ -30,47 +36,50 @@ export default async function PostDetailPage({ params }: Props) {
 
   return (
     <article className="min-h-screen bg-white pb-24">
-      {/* Cabecera / Hero Imagen */}
-      <div className="w-full bg-stone-50 border-b border-stone-200/60 py-8 mb-12">
-        <div className="max-w-3xl mx-auto px-4">
-          <Link href="/blog" className="inline-flex items-center gap-2 text-xs font-bold text-stone-500 hover:text-stone-800 transition-colors mb-6">
-            <ArrowLeft size={14} /> Volver al blog
+      
+      {/* Cabecera Minimalista */}
+      <div className="w-full bg-[#F5F5F7] border-b border-gray-200/50 pt-20 pb-16 mb-12">
+        <div className="max-w-3xl mx-auto px-6">
+          <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-black transition-colors mb-10">
+            <ArrowLeft size={16} /> Volver al inicio
           </Link>
           
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 mb-6">
             {tags.map((tag, idx) => (
-              <span key={idx} className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-teal-50 text-teal-700 border border-teal-100 rounded-md">
+              <span key={idx} className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 bg-gray-200/50 text-gray-700 rounded-lg">
                 {tag}
               </span>
             ))}
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-stone-900 leading-tight mb-6">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight mb-8">
             {post.title}
           </h1>
 
-          <div className="flex items-center gap-6 text-sm text-stone-500">
-            <span className="flex items-center gap-1.5"><Calendar size={16} /> {new Date(post.createdAt).toLocaleDateString()}</span>
-            <span className="flex items-center gap-1.5"><Clock size={16} /> Tiempo de lectura: {post.readTime}</span>
+          <div className="flex items-center gap-6 text-sm text-gray-500 font-medium uppercase tracking-wider">
+            <span className="flex items-center gap-2"><Calendar size={16} className="text-gray-400" /> {new Date(post.createdAt).toLocaleDateString()}</span>
+            <span className="flex items-center gap-2"><Clock size={16} className="text-gray-400" /> {post.readTime || "5 min"} de lectura</span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4">
+      <div className="max-w-3xl mx-auto px-6">
+        
+        {/* Imagen Principal */}
         {post.image && (
-          <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-sm border border-stone-100 mb-12">
+          <div className="relative w-full aspect-[21/9] rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 mb-16">
             <Image src={post.image} alt={post.title} fill className="object-cover" priority />
           </div>
         )}
 
-        {/* Resumen / Introducción */}
-        <p className="text-lg md:text-xl text-stone-600 font-serif italic border-l-4 border-teal-500 pl-4 mb-10 leading-relaxed">
+        {/* Resumen */}
+        <p className="text-xl md:text-2xl text-gray-500 font-medium leading-relaxed mb-12">
           {post.excerpt}
         </p>
 
-        {/* Contenido Principal Renderizado (Estilos enriquecidos) */}
+        {/* Cuerpo del Artículo (Tipografía optimizada) */}
         <div 
-          className="prose prose-stone max-w-none prose-headings:font-serif prose-headings:font-bold prose-p:leading-relaxed text-stone-800 markdown-body"
+          className="prose prose-lg max-w-none text-gray-700 prose-headings:font-bold prose-headings:text-gray-900 prose-headings:tracking-tight prose-a:text-[#007AFF] prose-img:rounded-2xl"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
       </div>
