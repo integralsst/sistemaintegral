@@ -3,13 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import sanitizeHtml from "sanitize-html";
 import { prisma } from "@/lib/prisma";
 import ShareArticleButton from "@/app/components/main/ui/ShareArticleButton";
-import DOMPurify from "isomorphic-dompurify";
 
 export const revalidate = 60;
 
-type PageParams = { slug: string } | Promise<{ slug: string }>;
+type PageParams = Promise<{ slug: string }>;
 
 function safeDecode(value: string) {
   try {
@@ -37,10 +37,64 @@ function getTags(category: string | null | undefined): string[] {
 function isValidImageSrc(src: string | null | undefined) {
   if (!src) return false;
 
-  return (
-    src.startsWith("/") ||
-    src.startsWith("https://res.cloudinary.com/")
-  );
+  return src.startsWith("/") || src.startsWith("https://res.cloudinary.com/");
+}
+
+function sanitizePostContent(content: string) {
+  const cleanContent = content
+    .replace(/href=(["'])www\./g, "href=$1https://www.")
+    .replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
+
+  return sanitizeHtml(cleanContent, {
+    allowedTags: [
+      "b",
+      "i",
+      "em",
+      "strong",
+      "a",
+      "p",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "ul",
+      "ol",
+      "li",
+      "blockquote",
+      "img",
+      "table",
+      "thead",
+      "tbody",
+      "tr",
+      "th",
+      "td",
+      "br",
+      "div",
+      "span",
+    ],
+    allowedAttributes: {
+      a: ["href", "target", "rel", "class", "style"],
+      img: ["src", "alt", "title", "width", "height", "class", "style"],
+      div: ["class", "style", "data-align"],
+      span: ["class", "style", "data-align"],
+      p: ["class", "style", "data-align"],
+      h1: ["class", "style", "data-align"],
+      h2: ["class", "style", "data-align"],
+      h3: ["class", "style", "data-align"],
+      h4: ["class", "style", "data-align"],
+      table: ["class", "style"],
+      thead: ["class", "style"],
+      tbody: ["class", "style"],
+      tr: ["class", "style"],
+      th: ["class", "style", "colspan", "rowspan"],
+      td: ["class", "style", "colspan", "rowspan"],
+      ul: ["class", "style"],
+      ol: ["class", "style"],
+      li: ["class", "style"],
+      blockquote: ["class", "style"],
+    },
+    allowedSchemes: ["http", "https", "mailto", "tel"],
+  });
 }
 
 export default async function PostDetailPage({
@@ -82,47 +136,7 @@ export default async function PostDetailPage({
       ? post.content
       : "<p>Este artículo no tiene contenido disponible.</p>";
 
-  const cleanContent = rawContent
-    .replace(/href=(["'])www\./g, "href=$1https://www.")
-    .replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
-
-  const safeHTML = DOMPurify.sanitize(cleanContent, {
-    ALLOWED_TAGS: [
-      "b",
-      "i",
-      "em",
-      "strong",
-      "a",
-      "p",
-      "h1",
-      "h2",
-      "h3",
-      "ul",
-      "ol",
-      "li",
-      "blockquote",
-      "img",
-      "table",
-      "thead",
-      "tbody",
-      "tr",
-      "th",
-      "td",
-      "br",
-      "div",
-      "span",
-    ],
-    ALLOWED_ATTR: [
-      "href",
-      "target",
-      "rel",
-      "src",
-      "alt",
-      "class",
-      "style",
-      "data-align",
-    ],
-  });
+  const safeHTML = sanitizePostContent(rawContent);
 
   const tags = getTags(post.category);
   const hasValidImage = isValidImageSrc(post.image);
@@ -249,7 +263,8 @@ export default async function PostDetailPage({
 
         .safe-content h1,
         .safe-content h2,
-        .safe-content h3 {
+        .safe-content h3,
+        .safe-content h4 {
           font-family: inherit;
           font-weight: 700;
           color: #1D1D1F;
@@ -265,6 +280,10 @@ export default async function PostDetailPage({
 
         .safe-content h3 {
           font-size: 1.35rem;
+        }
+
+        .safe-content h4 {
+          font-size: 1.15rem;
         }
 
         .safe-content blockquote {
