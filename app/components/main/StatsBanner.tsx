@@ -53,7 +53,7 @@ export default function StatsBanner() {
     },
     {
       icon: <Building2 size={28} strokeWidth={2} />,
-      target: 30000,
+      target: 500,
       prefix: "+",
       label: "Empresas",
       description: "Cobertura estratégica a nivel nacional",
