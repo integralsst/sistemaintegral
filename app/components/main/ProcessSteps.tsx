@@ -1,148 +1,247 @@
 "use client";
 
-import React from 'react';
+import React, { useState, KeyboardEvent } from 'react';
 import { Search, PenTool, Users, Activity } from 'lucide-react';
-import { motion, Variants } from 'framer-motion';
+import { motion, AnimatePresence, Variants, Transition } from 'framer-motion';
 
-export default function ProcessSteps() {
-  const steps = [
-    {
-      id: "01",
-      title: "Diagnóstico Inicial",
-      description: "Realizamos una auditoría profunda de su estado actual frente a la normativa legal vigente (Decreto 1072 y Resolución 0312).",
-      icon: <Search size={24} className="text-blue-600" />
-    },
-    {
-      id: "02",
-      title: "Diseño y Planificación",
-      description: "Estructuramos las matrices de riesgo, políticas y planes de trabajo anuales adaptados específicamente a la realidad de su empresa.",
-      icon: <PenTool size={24} className="text-blue-600" />
-    },
-    {
-      id: "03",
-      title: "Implementación",
-      description: "Ejecutamos capacitaciones, conformamos comités (COPASST/Convivencia) y ponemos en marcha los controles operativos.",
-      icon: <Users size={24} className="text-blue-600" />
-    },
-    {
-      id: "04",
-      title: "Auditoría y Mejora",
-      description: "Medimos resultados mediante indicadores, realizamos auditorías internas y aseguramos la mejora continua de su sistema.",
-      icon: <Activity size={24} className="text-blue-600" />
-    }
-  ];
+// --- Tipado Estricto ---
+interface ProcessStep {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  bgGradient: string;
+}
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15, delayChildren: 0.2 }
-    }
-  };
+// Curva Bezier para Layout (Elástica y Suave)
+const layoutTransition: Transition = {
+  type: "tween",
+  ease: [0.16, 1, 0.3, 1],
+  duration: 0.8,
+};
 
-  const cardVariants: Variants = {
-    hidden: { opacity: 0, y: 50, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: { type: "spring", stiffness: 80, damping: 15, mass: 1 }
+// Variantes para la revelación del texto interior
+const textRevealVariants: Variants = {
+  hidden: { y: "100%", opacity: 0 },
+  visible: { 
+    y: "0%", 
+    opacity: 1, 
+    transition: { type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.7 } 
+  }
+};
+
+const steps: ProcessStep[] = [
+  {
+    id: "01",
+    title: "Diagnóstico Inicial",
+    description: "Evaluación milimétrica frente al Decreto 1072 y Resolución 0312. Mapeamos sus vulnerabilidades legales sin fricciones en su operación.",
+    icon: Search,
+    bgGradient: "from-slate-100 to-slate-200"
+  },
+  {
+    id: "02",
+    title: "Diseño Estratégico",
+    description: "Arquitectura de matrices de riesgo y políticas corporativas. No usamos plantillas; construimos un blindaje a la medida de su empresa.",
+    icon: PenTool,
+    bgGradient: "from-blue-50 to-indigo-100"
+  },
+  {
+    id: "03",
+    title: "Implementación",
+    description: "Despliegue táctico. Capacitamos a su equipo y consolidamos comités operativos (COPASST), transformando la teoría legal en cultura organizacional.",
+    icon: Users,
+    bgGradient: "from-indigo-50 to-blue-100"
+  },
+  {
+    id: "04",
+    title: "Auditoría Continua",
+    description: "Monitoreo constante mediante indicadores de alta precisión. Garantizamos la mejora continua y blindamos su empresa ante inspecciones.",
+    icon: Activity,
+    bgGradient: "from-gray-50 to-slate-200"
+  }
+];
+
+export default function FluidProcessSteps() {
+  const [activeStep, setActiveStep] = useState<number>(0);
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>, index: number) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setActiveStep(index);
     }
   };
 
   return (
-    <section className="w-full py-24 md:py-32 bg-white relative z-10 overflow-hidden">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Cabecera Animada con efecto cinematográfico */}
+    <section className="w-full min-h-[100svh] bg-[#FAFAFA] text-gray-900 py-16 md:py-24 px-4 sm:px-6 lg:px-8 font-sans flex flex-col items-center justify-center overflow-hidden">
+      
+      {/* Cabecera */}
+      <div className="max-w-[1400px] mx-auto w-full mb-12 md:mb-16">
         <motion.div 
-          initial={{ opacity: 0, filter: "blur(10px)", y: 30 }}
-          whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="text-center max-w-3xl mx-auto mb-20 md:mb-28"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={layoutTransition}
+          className="flex flex-col md:flex-row md:items-end justify-between gap-8"
         >
-          <span className="text-xs font-bold tracking-widest uppercase text-blue-600 block mb-4">
-            Nuestra Metodología
-          </span>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 tracking-tighter mb-6 leading-[1.1]">
-            De la evaluación a la tranquilidad total.
-          </h2>
-          <p className="text-lg md:text-xl text-gray-500 font-medium leading-relaxed">
-            Un proceso estructurado de 4 fases para garantizar que su empresa cumpla con la ley y proteja a sus colaboradores sin sobrecargar su operación.
+          <div className="max-w-3xl">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95]">
+              El Sistema <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-600">
+                Integral.
+              </span>
+            </h2>
+          </div>
+          <p className="text-lg text-gray-500 font-medium max-w-sm leading-relaxed">
+            Metodología de alta precisión en 4 fases para la protección legal y operativa de su organización.
           </p>
         </motion.div>
+      </div>
 
-        <div className="relative">
-          {/* Línea conectora Desktop (Horizontal) */}
-          <motion.div 
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.3 }}
-            style={{ transformOrigin: "left" }}
-            className="hidden xl:block absolute top-12 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-gray-100 via-blue-100 to-gray-100 z-0"
-          />
+      {/* Contenedor Principal */}
+      <div className="max-w-[1400px] mx-auto w-full flex flex-col md:flex-row gap-3 md:gap-4 md:h-[70vh] md:min-h-[600px]">
+        {steps.map((step, index) => {
+          const isActive = activeStep === index;
 
-          {/* Línea conectora Mobile/Tablet (Vertical) */}
-          <motion.div 
-            initial={{ scaleY: 0 }}
-            whileInView={{ scaleY: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.3 }}
-            style={{ transformOrigin: "top" }}
-            className="xl:hidden absolute top-0 bottom-0 left-[31px] md:left-[39px] w-0.5 bg-gradient-to-b from-blue-50 via-blue-100 to-transparent z-0"
-          />
-
-          <motion.div 
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="grid grid-cols-1 xl:grid-cols-4 gap-8 md:gap-12 xl:gap-8 relative z-10"
-          >
-            {steps.map((step, index) => (
+          return (
+            <motion.div
+              key={step.id}
+              layout
+              onClick={() => setActiveStep(index)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
+              tabIndex={0}
+              role="button"
+              aria-expanded={isActive}
+              transition={{ layout: layoutTransition }}
+              style={{ willChange: "auto" }}
+              className={`
+                relative cursor-pointer overflow-hidden rounded-[2rem] md:rounded-[2.5rem]
+                bg-gradient-to-br ${step.bgGradient}
+                border border-black/[0.04] shadow-inner focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/50
+                group flex flex-col transition-colors duration-500
+                ${isActive 
+                  ? 'flex-[0.7] h-auto min-h-[420px] md:min-h-0' 
+                  : 'flex-[0.1] h-[84px] md:h-auto hover:bg-gray-100/50'
+                }
+              `}
+            >
+              {/* Header Inactivo (Icono + Badge) */}
               <motion.div 
-                key={index} 
-                variants={cardVariants} 
-                className="relative flex flex-row xl:flex-col gap-6 xl:gap-0 group"
+                layout="position"
+                transition={{ layout: layoutTransition }}
+                className={`
+                  p-5 md:p-8 flex items-center justify-between z-20 shrink-0
+                  ${isActive ? 'flex-row' : 'flex-row md:flex-col md:justify-start md:h-full md:gap-6'}
+                `}
               >
-                {/* Conector Móvil (Punto en la línea) */}
-                <div className="xl:hidden flex-shrink-0 relative z-10 mt-6 md:mt-4">
-                  <div className="w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-sm absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:scale-150 transition-transform duration-500" />
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white border border-gray-100 flex items-center justify-center shadow-xl shadow-gray-200/20 group-hover:border-blue-100 transition-colors">
-                    {React.cloneElement(step.icon, { className: "w-6 h-6 md:w-8 md:h-8 text-blue-600 group-hover:scale-110 transition-transform duration-500" })}
-                  </div>
+                <div className={`
+                  flex items-center justify-center rounded-2xl bg-white shadow-[0_2px_10px_rgba(0,0,0,0.04)] border border-gray-100
+                  transition-all duration-500 ease-out
+                  ${isActive ? 'w-12 h-12 md:w-14 md:h-14 opacity-0 absolute pointer-events-none' : 'w-11 h-11 md:w-16 md:h-16 group-hover:scale-105 group-hover:shadow-md opacity-100 relative'}
+                `}>
+                  <step.icon className={`text-blue-600 ${isActive ? 'w-5 h-5 md:w-6 md:h-6' : 'w-5 h-5 md:w-7 md:h-7'}`} />
                 </div>
-
-                {/* Tarjeta Principal */}
-                <motion.div 
-                  whileHover={{ y: -8, transition: { duration: 0.3, ease: "easeOut" } }}
-                  className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-[2rem] p-6 md:p-8 hover:border-blue-100 hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500 flex-grow xl:h-full flex flex-col"
-                >
-                  
-                  {/* Icono Desktop */}
-                  <div className="hidden xl:flex justify-between items-start mb-8">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-50 to-white flex items-center justify-center shadow-inner border border-blue-100/50 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500">
-                      {step.icon}
-                    </div>
-                    <span className="text-5xl font-black text-transparent -webkit-text-stroke-1 -webkit-text-stroke-gray-100 group-hover:-webkit-text-stroke-blue-200 transition-all duration-500">
-                      {step.id}
-                    </span>
+                
+                {!isActive && (
+                  <span className="hidden md:block text-2xl font-bold text-gray-400/60 -rotate-90 origin-center whitespace-nowrap mt-12 transition-colors group-hover:text-gray-500/80">
+                    Fase {step.id}
+                  </span>
+                )}
+                
+                {!isActive && (
+                  <div className="md:hidden flex items-center gap-3">
+                    <span className="text-lg font-bold text-gray-700">{step.title}</span>
+                    <span className="text-sm font-bold text-gray-400">0{index + 1}</span>
                   </div>
-                  
-                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 tracking-tight group-hover:text-blue-700 transition-colors duration-300">
-                    {step.title}
-                  </h3>
-                  
-                  <p className="text-gray-500 text-[15px] leading-relaxed font-medium">
-                    {step.description}
-                  </p>
-                </motion.div>
+                )}
               </motion.div>
-            ))}
-          </motion.div>
-        </div>
+
+              {/* Contenido Expandido */}
+              <AnimatePresence>
+                {isActive && (
+                  <motion.div
+                    // Animación de salida extremadamente rápida para evitar layout shifts en móviles
+                    initial={{ opacity: 0, filter: "blur(8px)", scale: 0.98 }}
+                    animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+                    exit={{ opacity: 0, transition: { duration: 0.1 } }}
+                    transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute inset-x-0 bottom-0 p-4 md:p-8 z-30 h-full flex flex-col justify-end pointer-events-none"
+                  >
+                    {/* Contenedor fluido, se elimina el min-w rígido para garantizar la vista en iPhone SE y dispositivos de 320px */}
+                    <div className="relative overflow-hidden bg-white/80 backdrop-blur-2xl border border-white/80 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-12 shadow-[0_8px_40px_rgba(0,0,0,0.06)] h-full flex flex-col md:flex-row gap-6 md:gap-12 w-full max-w-full pointer-events-auto">
+                      
+                      {/* Textura de Ruido SVG */}
+                      <div 
+                        className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
+                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+                      />
+
+                      {/* Columna Izquierda: Identidad Numérica */}
+                      <div className="relative z-10 flex flex-col justify-between items-start md:w-1/3 border-b md:border-b-0 md:border-r border-gray-200/50 pb-5 md:pb-0 md:pr-12 shrink-0">
+                        <div className="w-14 h-14 rounded-full bg-blue-600/10 flex items-center justify-center text-blue-600 mb-8 hidden md:flex">
+                           <step.icon className="w-6 h-6" />
+                        </div>
+                        
+                        <div className="w-full">
+                          <span className="text-blue-600 font-bold tracking-[0.2em] text-[10px] md:text-xs uppercase mb-2 block">
+                            Fase del Proceso
+                          </span>
+                          <span className="text-6xl md:text-8xl font-black text-gray-900 tracking-tighter leading-none -ml-1">
+                            {step.id}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Columna Derecha: Tipografía */}
+                      <div className="relative z-10 flex flex-col justify-end md:w-2/3 h-full">
+                        <motion.div
+                          initial="hidden"
+                          animate="visible"
+                          variants={{
+                            visible: { transition: { staggerChildren: 0.1 } }
+                          }}
+                          className="flex flex-col h-full justify-between"
+                        >
+                          {/* El pb-3 y -mb-3 garantizan que los trazos de la 'g', 'p' o 'q' no se corten con el overflow-hidden */}
+                          <div className="overflow-hidden pb-3 -mb-3 mb-4 md:mb-6 mt-auto">
+                            <motion.h3 
+                              variants={textRevealVariants}
+                              className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight leading-[1.15]"
+                            >
+                              {step.title}
+                            </motion.h3>
+                          </div>
+                          
+                          <motion.div variants={textRevealVariants}>
+                            <p className="text-gray-600 text-base md:text-lg lg:text-xl font-medium leading-relaxed max-w-xl">
+                              {step.description}
+                            </p>
+                          </motion.div>
+                        </motion.div>
+                      </div>
+
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Decoración de Fondo Abstracta */}
+              <AnimatePresence>
+                {isActive && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0, transition: { duration: 0.1 } }}
+                    transition={{ duration: 0.8 }}
+                    className="absolute inset-0 z-10 pointer-events-none mix-blend-multiply"
+                    style={{
+                      background: 'radial-gradient(circle at 70% 30%, rgba(37, 99, 235, 0.12) 0%, transparent 60%)'
+                    }}
+                  />
+                )}
+              </AnimatePresence>
+
+            </motion.div>
+          );
+        })}
       </div>
     </section>
   );
