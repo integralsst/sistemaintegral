@@ -21,24 +21,23 @@ const SLIDE_DURATION = 6000;
 const APPLE_EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 const SWIPE_CONFIDENCE_THRESHOLD = 10000;
 
-// ANIMACIÓN WOW: Retraso inicial para dejar que el fondo cargue, luego revelación en cascada.
+// ANIMACIÓN CORREGIDA: Eliminación de 'blur' para asegurar el renderizado en móviles (WebKit bug fix).
+// Uso estricto de transformaciones GPU-friendly.
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.15, delayChildren: 0.3 },
+    transition: { staggerChildren: 0.15, delayChildren: 0.1 },
   },
 };
 
-// ANIMACIÓN WOW: Desenfoque profundo, hundimiento de escala (0.9) y mayor desplazamiento vertical.
 const itemVariants: Variants = {
-  hidden: { y: 50, opacity: 0, scale: 0.9, filter: "blur(15px)" },
+  hidden: { y: 40, opacity: 0, scale: 0.95 },
   visible: {
     y: 0,
     opacity: 1,
     scale: 1,
-    filter: "blur(0px)",
-    transition: { duration: 1.4, ease: APPLE_EASE },
+    transition: { duration: 1.2, ease: APPLE_EASE },
   },
 };
 
@@ -76,6 +75,7 @@ export default function Hero() {
   return (
     <section className="relative w-full min-h-[100svh] bg-[#050505] overflow-hidden font-sans">
       
+      {/* Capa de control táctil (Swipe en móvil) */}
       <motion.div 
         className="absolute inset-0 z-20 touch-pan-y md:hidden" 
         drag="x"
@@ -84,6 +84,7 @@ export default function Hero() {
         onDragEnd={handleDragEnd}
       />
 
+      {/* Renderizado del Carrusel de Fondo */}
       <AnimatePresence initial={false}>
         <motion.div
           key={currentSlide}
@@ -103,8 +104,8 @@ export default function Hero() {
               sizes="100vw"
             />
             
-            <div className="absolute inset-0 bg-black/10" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 md:via-transparent to-transparent md:bg-gradient-to-r md:from-black/90 md:via-black/50 md:w-3/4" />
+            <div className="absolute inset-0 bg-black/15" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-black/40 md:via-transparent to-transparent md:bg-gradient-to-r md:from-black/95 md:via-black/60 md:w-3/4" />
             <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
           </div>
         </motion.div>
@@ -112,7 +113,7 @@ export default function Hero() {
 
       <div className="absolute inset-0 z-10 flex flex-col justify-end pb-28 md:justify-center md:pt-32 md:pb-16 px-6 md:px-16 container mx-auto pointer-events-none">
         
-        <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-blue-900/15 blur-[120px] rounded-full -z-10" />
+        <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-blue-900/20 blur-[120px] rounded-full -z-10" />
 
         <motion.div
           variants={containerVariants}
@@ -120,25 +121,25 @@ export default function Hero() {
           animate="visible"
           className="relative z-10 max-w-3xl pointer-events-auto w-full flex flex-col items-center text-center md:items-start md:text-left"
         >
+          {/* NUEVO COPY: Metricas simétricas, directo al SG-SST */}
           <motion.h1 
             variants={itemVariants}
-            className="text-white text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-[5rem] font-extrabold md:leading-[1.05] tracking-tight md:tracking-tighter mb-5 md:mb-6"
+            className="text-white text-[2.75rem] leading-[1.05] sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold md:leading-[1.02] tracking-tight md:tracking-tighter mb-5 md:mb-6"
             style={{ textShadow: "0px 10px 30px rgba(0,0,0,0.8)" }}
           >
-            Cumplimiento Legal.
-            {/* FIX: Uso de 'block md:inline' para forzar el salto limpio en móvil sin que se corte feo, uniéndose en desktop */}
-            <span className="block md:inline mt-1 md:mt-0 bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-gray-300 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+            <span className="block">Gestión SG-SST.</span>
+            <span className="block mt-1 md:mt-2 bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-gray-400 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
               Sin Complicaciones.
             </span>
           </motion.h1>
 
           <motion.p 
             variants={itemVariants}
-            className="text-gray-300 text-[15px] sm:text-lg md:text-xl font-normal leading-relaxed max-w-[90%] md:max-w-2xl mx-auto md:mx-0 mb-8 md:mb-10"
+            className="text-gray-200 text-[16px] sm:text-lg md:text-xl font-medium leading-relaxed max-w-[95%] md:max-w-2xl mx-auto md:mx-0 mb-8 md:mb-12"
             style={{ textShadow: "0px 2px 8px rgba(0,0,0,0.9)" }}
           >
-            Diseñamos, implementamos y auditamos tu Sistema de Gestión
-            <span className="hidden md:inline"> para proteger a tu equipo y blindar tu empresa ante las normativas de riesgos laborales</span>.
+            Simplificamos la implementación y auditoría de tu sistema.
+            <span className="hidden md:inline"> Protege a tu equipo humano y asegura el cumplimiento legal de tu empresa sin reprocesos.</span>
           </motion.p>
           
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 md:gap-5 w-full sm:w-auto items-center">
@@ -146,7 +147,7 @@ export default function Hero() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.96 }}
               transition={buttonSpring}
-              className="w-full sm:w-auto px-8 py-3.5 md:py-4 rounded-full bg-white text-black font-bold text-[15px] md:text-base shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] transition-shadow"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-black font-bold text-[15px] md:text-base shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.6)] transition-shadow"
             >
               Solicitar Asesoría
             </motion.button>
@@ -154,7 +155,7 @@ export default function Hero() {
               whileHover={{ scale: 1.03, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
               whileTap={{ scale: 0.96 }}
               transition={buttonSpring}
-              className="w-full sm:w-auto px-8 py-3.5 md:py-4 rounded-full bg-transparent backdrop-blur-md border border-white/30 text-white font-semibold text-[15px] md:text-base transition-colors"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-transparent backdrop-blur-md border border-white/30 text-white font-semibold text-[15px] md:text-base transition-colors"
             >
               Conocer Servicios
             </motion.button>
@@ -185,15 +186,15 @@ export default function Hero() {
         </motion.button>
       </div>
 
-      <div className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-16 bottom-8 md:bottom-12 z-20 flex gap-2.5 pointer-events-auto">
+      <div className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-16 bottom-8 md:bottom-12 z-20 flex gap-3 pointer-events-auto">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`h-2 md:h-2.5 rounded-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
               index === currentSlide 
-                ? "bg-white scale-125 md:w-6 shadow-[0_0_10px_rgba(255,255,255,0.8)]" 
-                : "bg-white/40 hover:bg-white/70"
+                ? "bg-white w-6 shadow-[0_0_12px_rgba(255,255,255,0.9)]" 
+                : "bg-white/40 w-2 md:w-2.5 hover:bg-white/70"
             }`}
             aria-label={`Ir a la diapositiva ${index + 1}`}
           />
