@@ -22,11 +22,9 @@ const textVariants: Variants = {
   exit: { opacity: 0, y: -10, filter: "blur(4px)", transition: { duration: 0.2 } }
 };
 
-// --- Componente Principal ---
 export default function PainPointsInteractive() {
   const [activeView, setActiveView] = useState<ViewMode>('risk');
 
-  // Datos de las vistas
   const contentData = {
     risk: {
       tag: "El costo de la inacción",
@@ -53,7 +51,7 @@ export default function PainPointsInteractive() {
       description: "Asumimos la carga operativa y técnica. Garantizamos la protección de sus empleados y la rentabilidad de su negocio.",
       icon: <ShieldCheck className="w-12 h-12 text-blue-500" />,
       themeStyles: {
-        bg: "#09090B", // Dark mode profundo
+        bg: "#09090B",
         border: "rgba(59, 130, 246, 0.15)",
         shadow: "0 20px 60px rgba(0, 0, 0, 0.4)",
         textMain: "text-white",
@@ -73,8 +71,8 @@ export default function PainPointsInteractive() {
   return (
     <section className="w-full py-20 md:py-32 bg-[#F5F5F7] font-sans flex flex-col items-center overflow-hidden">
       
-      {/* Cabecera y Segmented Control (iOS Style) */}
-      <div className="max-w-3xl w-full mx-auto px-4 text-center mb-10 md:mb-16">
+      {/* Cabecera y Segmented Control */}
+      <div className="max-w-3xl w-full mx-auto px-6 text-center mb-10 md:mb-16">
         <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-gray-900 tracking-tighter mb-8 md:mb-12 leading-[1.05]">
           El verdadero costo de la <br className="hidden md:block" />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-gray-600">
@@ -117,13 +115,14 @@ export default function PainPointsInteractive() {
       {/* Ventana Inmersiva Dinámica */}
       <div className="w-full max-w-[1200px] px-4 sm:px-6 lg:px-8">
         <motion.div
+          layout // Previene el "brinco" adaptando la altura fluidamente entre cambios de contenido
           animate={{
             backgroundColor: activeContent.themeStyles.bg,
             borderColor: activeContent.themeStyles.border,
             boxShadow: activeContent.themeStyles.shadow,
           }}
-          transition={{ duration: 0.8, ease: appleEase }}
-          className="relative w-full min-h-[550px] md:min-h-[450px] rounded-[2rem] md:rounded-[3rem] border overflow-hidden flex flex-col justify-center p-6 md:p-12 lg:p-16 transform-gpu"
+          transition={{ duration: 0.8, ease: appleEase, layout: { duration: 0.6, ease: appleEase } }}
+          className="relative w-full min-h-[600px] md:min-h-[450px] rounded-[2rem] md:rounded-[3rem] border overflow-hidden flex flex-col justify-center p-8 sm:p-10 md:p-12 lg:p-16 transform-gpu"
         >
           {/* Textura de Ruido SVG para prevenir banding en Dark Mode */}
           <div 
@@ -142,7 +141,7 @@ export default function PainPointsInteractive() {
             >
               
               {/* Columna Izquierda: Hero Content */}
-              <div className="w-full lg:w-5/12 flex flex-col items-start shrink-0">
+              <div className="w-full lg:w-5/12 flex flex-col items-start shrink-0 pt-4 lg:pt-0">
                 <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-6 ${activeContent.themeStyles.tagBg}`}>
                   {activeContent.tag}
                 </span>
@@ -156,14 +155,13 @@ export default function PainPointsInteractive() {
                 </p>
               </div>
 
-              {/* Columna Derecha: The Bento Features */}
-              {/* SOLUCIÓN MÓVIL (Snap Scroll): Ocultamos el scrollbar y permitimos deslizar horizontalmente */}
-              <div className="w-full lg:w-7/12 mt-4 lg:mt-0">
+              {/* Columna Derecha: The Bento Features (Optimizado para evitar cortes en bordes móviles) */}
+              <div className="w-full lg:w-7/12 mt-2 lg:mt-0">
                 <div className="
                   flex lg:grid lg:grid-cols-2 gap-4 md:gap-6 
                   overflow-x-auto lg:overflow-x-visible 
                   snap-x snap-mandatory 
-                  pb-6 -mx-6 px-6 lg:mx-0 lg:px-0 lg:pb-0
+                  pb-8 -mx-8 px-8 lg:mx-0 lg:px-0 lg:pb-0 /* Padding negativo expandido para scroll suave */
                   [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
                 ">
                   {activeContent.items.map((item, index) => (
@@ -173,8 +171,8 @@ export default function PainPointsInteractive() {
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       transition={{ duration: 0.5, delay: 0.1 * index, ease: appleEase }}
                       className={`
-                        w-[85vw] sm:w-[300px] lg:w-full shrink-0 snap-center
-                        p-6 md:p-8 rounded-3xl border flex flex-col justify-between
+                        w-[80vw] sm:w-[320px] lg:w-full shrink-0 snap-center
+                        p-7 md:p-8 rounded-[2rem] border flex flex-col justify-between
                         transition-all duration-300 transform-gpu
                         ${activeContent.themeStyles.bg === '#FFFFFF' ? 'bg-gray-50 border-gray-100' : 'bg-[#18181B] border-white/5'}
                         ${index === 2 ? 'lg:col-span-2 lg:flex-row lg:items-center lg:gap-8' : ''}
@@ -199,7 +197,7 @@ export default function PainPointsInteractive() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Orbe Decorativo de Fondo - Sigue el color del tema activo */}
+          {/* Orbe Decorativo de Fondo */}
           <motion.div
             animate={{
               background: activeView === 'risk' 
