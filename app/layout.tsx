@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
+// Importamos Plus Jakarta Sans, la reina del diseño geométrico actual
+import { Plus_Jakarta_Sans } from "next/font/google"; 
 import "./globals.css";
+
+// Configuramos la nueva tipografía
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800"], // Nos aseguramos de traer todos los grosores
+});
 
 export const metadata: Metadata = {
   title: "SIS | Sistema Integral en Riesgos Laborales",
@@ -22,7 +31,6 @@ export const metadata: Metadata = {
     locale: "es_CO",
     type: "website",
   },
-  // Inyección de fuerza bruta apuntando a la carpeta public
   icons: {
     icon: [
       { url: '/favicon.png', type: 'image/png' }
@@ -41,7 +49,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="scroll-smooth">
-      <body className="antialiased bg-white">
+      {/* Inyectamos la clase de Jakarta */}
+      <body className={`antialiased bg-white ${jakarta.className}`}>
         {children}
       </body>
     </html>

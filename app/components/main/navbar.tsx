@@ -3,11 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent, Variants } from "framer-motion";
 
-// Íconos SVG personalizados
 const Instagram = ({ className, strokeWidth = 1.5 }: { className?: string, strokeWidth?: number }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
     <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
@@ -15,19 +16,50 @@ const Instagram = ({ className, strokeWidth = 1.5 }: { className?: string, strok
 );
 
 const Linkedin = ({ className, strokeWidth = 1.5 }: { className?: string, strokeWidth?: number }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
     <rect width="4" height="12" x="2" y="9"/>
     <circle cx="4" cy="4" r="2"/>
   </svg>
 );
 
+const servicios = [
+  { name: "Gestión Documental", href: "/servicios/gestion-documental" },
+  { name: "Gestión a la Intervención", href: "/servicios/gestion-a-la-intervencion" },
+  { name: "Gestión a Emergencias", href: "/servicios/gestion-a-emergencias" },
+  { name: "Gestión Especializada", href: "/servicios/gestion-especializada" },
+];
+
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isHidden, setIsHidden] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false); // NUEVO ESTADO: Detecta si hemos bajado
+  const [isServicesHovered, setIsServicesHovered] = useState(false);
+  
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  
+  const { scrollY } = useScroll();
 
-  // Lógica para bloquear scroll con el menú abierto
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = scrollY.getPrevious() ?? 0;
+    if (isMobileMenuOpen) return;
+    
+    // 1. Ocultar el Navbar al bajar rápido
+    if (latest > previous && latest > 150) {
+      setIsHidden(true);
+    } else {
+      setIsHidden(false);
+    }
+
+    // 2. Conciencia de Scroll: Mutar colores al pasar los primeros 50px
+    if (latest > 50) {
+      setIsScrolled(true);
+    } else {
+      setIsScrolled(false);
+    }
+  });
+
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -36,188 +68,209 @@ export default function Navbar() {
     }
   }, [isMobileMenuOpen]);
 
-  // Lógica para el Smart Navbar (Ocultar al bajar, mostrar al subir)
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+  // LA REGLA MAESTRA: 
+  // Es modo oscuro (cristal transparente, texto blanco) SOLO si estamos en el Inicio Y NO hemos bajado la pantalla.
+  const isTransparentMode = isHome && !isScrolled;
 
-      // Si el menú móvil está abierto, nunca ocultar el Navbar
-      if (isMobileMenuOpen) {
-        setIsVisible(true);
-        return;
-      }
+  const navBgClass = isTransparentMode 
+    ? "bg-white/5 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)]" 
+    : "bg-white/95 backdrop-blur-3xl border-gray-200/50 shadow-sm";
+    
+  const textClass = isTransparentMode 
+    ? "text-white/80 hover:text-white" 
+    : "text-gray-700 hover:text-black";
+    
+  const hoverBgClass = isTransparentMode 
+    ? "hover:bg-white/10" 
+    : "hover:bg-gray-100";
+    
+  const iconClass = isTransparentMode 
+    ? "text-white/60 hover:text-white" 
+    : "text-gray-500 hover:text-blue-600";
+    
+  const dropdownBgClass = isTransparentMode
+    ? "bg-[#0a0a0a]/98 border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+    : "bg-white/98 border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)]";
 
-      // Si hacemos scroll hacia abajo y hemos pasado la altura del navbar (80px)
-      if (currentScrollY > lastScrollY && currentScrollY > 80) {
-        setIsVisible(false); // Ocultar
-      } else {
-        setIsVisible(true);  // Mostrar al subir
-      }
+  const dropdownItemClass = isTransparentMode
+    ? "text-gray-300 hover:text-white hover:bg-white/10"
+    : "text-gray-600 hover:text-blue-600 hover:bg-gray-50";
 
-      setLastScrollY(currentScrollY);
-    };
+  const mobileMenuVariants: Variants = {
+    closed: { opacity: 0, transition: { staggerChildren: 0.05, staggerDirection: -1 } },
+    open: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } }
+  };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY, isMobileMenuOpen]);
-
-  const servicios = [
-    { name: "Gestión Documental", href: "/servicios/gestion-documental" },
-    { name: "Gestión a la Intervención", href: "/servicios/gestion-a-la-intervencion" },
-    { name: "Gestión a Emergencias", href: "/servicios/gestion-a-emergencias" },
-    { name: "Gestión Especializada", href: "/servicios/gestion-especializada" },
-  ];
+  const mobileItemVariants: Variants = {
+    closed: { y: 20, opacity: 0 },
+    open: { y: 0, opacity: 1, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } }
+  };
 
   return (
     <>
-      <nav 
-        className={`fixed top-0 w-full z-[999] bg-white/80 backdrop-blur-md text-gray-800 border-b border-gray-100/50 transition-transform duration-500 ease-[cubic-bezier(0.21,0.47,0.32,0.98)] ${
-          isVisible ? "translate-y-0" : "-translate-y-full"
-        }`}
+      <motion.nav 
+        className="fixed top-0 inset-x-0 z-[100] px-4 md:px-8 py-6"
+        initial={{ y: -100 }}
+        animate={{ y: isHidden ? -100 : 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            
-            {/* Logo */}
-            <div className="flex-shrink-0 flex items-center relative z-50">
-              <Link href="/" className="transition-opacity hover:opacity-80" onClick={() => setIsMobileMenuOpen(false)}>
-                <Image 
-                  src="/images/logo.png" 
-                  alt="Logo de Sistema Integral" 
-                  width={150} 
-                  height={50} 
-                  className="w-auto h-12 object-contain" 
-                  priority
-                />
-              </Link>
+        <div className={`mx-auto max-w-6xl flex justify-between items-center backdrop-blur-2xl border rounded-full px-6 py-3 transition-all duration-500 ${navBgClass}`}>
+          
+          <Link href="/" className="relative z-50 flex items-center group" onClick={() => setIsMobileMenuOpen(false)}>
+            <Image 
+              src="/images/Logo.png" 
+              alt="Logo SIS" 
+              width={120} 
+              height={40} 
+              // Mutación suave del color del logo
+              className={`w-auto h-8 object-contain transition-all duration-500 group-hover:scale-105 ${!isTransparentMode ? 'brightness-0' : ''}`} 
+              priority
+            />
+          </Link>
+
+          <div className="hidden md:flex items-center space-x-1">
+            <Link href="/" className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 tracking-wide ${textClass} ${hoverBgClass}`}>
+              INICIO
+            </Link>
+
+            <div 
+              className="relative"
+              onMouseEnter={() => setIsServicesHovered(true)}
+              onMouseLeave={() => setIsServicesHovered(false)}
+            >
+              <button className={`flex items-center px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 tracking-wide ${textClass} ${hoverBgClass}`}>
+                SERVICIOS
+                <ChevronDown className={`w-4 h-4 ml-1.5 transition-transform duration-300 ${isServicesHovered ? "rotate-180" : ""}`} />
+              </button>
+              
+              <AnimatePresence>
+                {isServicesHovered && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className={`absolute top-full left-1/2 -translate-x-1/2 mt-4 w-72 backdrop-blur-3xl border rounded-2xl py-3 overflow-hidden z-[120] ${dropdownBgClass}`}
+                  >
+                    {servicios.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className={`block px-6 py-3 text-sm font-medium transition-colors ${dropdownItemClass}`}
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* Menú de Escritorio */}
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-sm font-medium hover:text-blue-600 transition-colors">
-                INICIO
-              </Link>
+            <Link href="/blog" className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 tracking-wide ${textClass} ${hoverBgClass}`}>
+              BLOG
+            </Link>
 
-              {/* Dropdown Servicios */}
-              <div className="relative group py-6">
-                <button className="flex items-center text-sm font-medium hover:text-blue-600 transition-colors">
-                  SERVICIOS
-                  <ChevronDown className="w-4 h-4 ml-1 opacity-50 group-hover:opacity-100 transition-opacity" />
-                </button>
-                <div className="absolute left-0 mt-0 w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-gray-100/50 transform origin-top -translate-y-2 group-hover:translate-y-0">
+            <Link href="/contacto" className={`px-5 py-2 rounded-full text-sm font-semibold text-[var(--color-sis-light)] transition-all duration-300 tracking-wide ml-2 ${isTransparentMode ? 'hover:bg-[var(--color-sis-light)]/20' : 'hover:bg-blue-50'}`}>
+              CONTÁCTENOS
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-4 relative z-50">
+            <div className={`hidden md:flex items-center gap-3 border-r pr-4 transition-colors duration-500 ${isTransparentMode ? 'border-white/10' : 'border-gray-200'}`}>
+              <a href="#" className={`p-2 bg-transparent rounded-full transition-all duration-300 ${iconClass} ${hoverBgClass}`}>
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" className={`p-2 bg-transparent rounded-full transition-all duration-300 ${iconClass} ${hoverBgClass}`}>
+                <Linkedin className="w-5 h-5" />
+              </a>
+            </div>
+
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className={`md:hidden p-2 rounded-full transition-all duration-500 ${isTransparentMode ? 'text-white bg-white/10 hover:bg-white/20' : 'text-gray-900 bg-gray-100 hover:bg-gray-200'}`}
+            >
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={isMobileMenuOpen ? "close" : "menu"}
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </motion.div>
+              </AnimatePresence>
+            </button>
+          </div>
+        </div>
+      </motion.nav>
+
+      {/* MENÚ MÓVIL INMERSIVO */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={{
+              closed: { opacity: 0, backdropFilter: "blur(0px)" },
+              open: { opacity: 1, backdropFilter: "blur(40px)" }
+            }}
+            transition={{ duration: 0.4 }}
+            className="fixed inset-0 z-[90] bg-black/80 flex flex-col pt-32 px-6 pb-12 overflow-y-auto"
+          >
+            <motion.div variants={mobileMenuVariants} className="flex flex-col gap-8">
+              <motion.div variants={mobileItemVariants}>
+                <Link href="/" className="text-4xl font-semibold text-white tracking-tight" onClick={() => setIsMobileMenuOpen(false)}>
+                  Inicio
+                </Link>
+              </motion.div>
+              
+              <motion.div variants={mobileItemVariants} className="flex flex-col gap-5">
+                <span className="text-sm font-bold text-[var(--color-sis-light)] tracking-widest uppercase">
+                  Servicios
+                </span>
+                <div className="flex flex-col gap-4">
                   {servicios.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="block px-5 py-2.5 text-sm text-gray-600 hover:bg-gray-50/80 hover:text-blue-600 transition-colors"
+                    <Link 
+                      key={item.name} 
+                      href={item.href} 
+                      className="flex items-center justify-between text-2xl text-gray-300 hover:text-white"
+                      onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {item.name}
+                      <ChevronRight className="w-5 h-5 opacity-30" />
                     </Link>
                   ))}
                 </div>
-              </div>
+              </motion.div>
+              
+              <div className="w-full h-px bg-white/10 my-4" />
+              
+              <motion.div variants={mobileItemVariants}>
+                <Link href="/blog" className="text-4xl font-semibold text-white tracking-tight" onClick={() => setIsMobileMenuOpen(false)}>
+                  Blog
+                </Link>
+              </motion.div>
+              
+              <motion.div variants={mobileItemVariants}>
+                <Link href="/contacto" className="text-4xl font-semibold text-white tracking-tight" onClick={() => setIsMobileMenuOpen(false)}>
+                  Contáctenos
+                </Link>
+              </motion.div>
 
-              <Link href="/blog" className="text-sm font-medium hover:text-blue-600 transition-colors">
-                BLOG
-              </Link>
-
-              <Link href="/contacto" className="text-sm font-medium hover:text-blue-600 transition-colors">
-                CONTÁCTENOS
-              </Link>
-            </div>
-
-            {/* Iconos Redes Sociales (Escritorio) */}
-            <div className="hidden md:flex items-center space-x-4">
-              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors" aria-label="Instagram">
-                <Instagram className="w-5 h-5" strokeWidth={1.5} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors" aria-label="LinkedIn">
-                <Linkedin className="w-5 h-5" strokeWidth={1.5} />
-              </a>
-            </div>
-
-            {/* Botón Menú Móvil */}
-            <div className="md:hidden flex items-center relative z-50">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-gray-900 hover:text-blue-600 focus:outline-none p-2 bg-gray-50/50 rounded-full transition-colors"
-                aria-label="Alternar menú"
-              >
-                {isMobileMenuOpen ? (
-                  <X className="h-6 w-6 transition-transform duration-300 rotate-90" strokeWidth={1.5} />
-                ) : (
-                  <Menu className="h-6 w-6 transition-transform duration-300" strokeWidth={1.5} />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Overlay del Menú Móvil (Pantalla Completa) */}
-      <div 
-        className={`md:hidden fixed inset-0 top-0 z-40 bg-white/98 backdrop-blur-2xl transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-          isMobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8 pointer-events-none"
-        }`}
-      >
-        <div className="h-full overflow-y-auto px-6 pt-28 pb-12">
-          <div className="flex flex-col space-y-8">
-            
-            <Link 
-              href="/" 
-              className="text-3xl font-semibold text-gray-900 hover:text-blue-600 transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Inicio
-            </Link>
-            
-            <div className="space-y-4">
-              <div className="text-sm font-bold text-blue-600 tracking-wider">SERVICIOS</div>
-              <div className="flex flex-col space-y-4">
-                {servicios.map((item) => (
-                  <Link 
-                    key={item.name} 
-                    href={item.href} 
-                    className="flex items-center justify-between text-xl text-gray-600 hover:text-gray-900 transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item.name}
-                    <ChevronRight className="w-5 h-5 opacity-40" />
-                  </Link>
-                ))}
-              </div>
-            </div>
-            
-            <div className="pt-4 border-t border-gray-100 space-y-6">
-              <Link 
-                href="/blog" 
-                className="block text-3xl font-semibold text-gray-900 hover:text-blue-600 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Blog
-              </Link>
-              <Link 
-                href="/contacto" 
-                className="block text-3xl font-semibold text-gray-900 hover:text-blue-600 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Contáctenos
-              </Link>
-            </div>
-
-            {/* Redes en móvil */}
-            <div className="flex items-center space-x-8 pt-8 mt-auto">
-              <a href="#" className="text-gray-400 hover:text-blue-600 bg-gray-50 p-4 rounded-full transition-colors" aria-label="Instagram">
-                <Instagram className="w-7 h-7" strokeWidth={1.5} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-blue-600 bg-gray-50 p-4 rounded-full transition-colors" aria-label="LinkedIn">
-                <Linkedin className="w-7 h-7" strokeWidth={1.5} />
-              </a>
-            </div>
-
-          </div>
-        </div>
-      </div>
+              <motion.div variants={mobileItemVariants} className="flex gap-4 pt-8 mt-auto">
+                <a href="#" className="p-4 bg-white/10 rounded-full text-white hover:bg-[var(--color-sis-light)] transition-colors">
+                  <Instagram className="w-6 h-6" />
+                </a>
+                <a href="#" className="p-4 bg-white/10 rounded-full text-white hover:bg-[var(--color-sis-light)] transition-colors">
+                  <Linkedin className="w-6 h-6" />
+                </a>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
