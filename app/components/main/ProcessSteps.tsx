@@ -13,7 +13,7 @@ interface ProcessStep {
   bgGradient: string;
 }
 
-// Curva Bezier para Layout (Elástica y Suave)
+// Curva Bezier para Layout 
 const layoutTransition: Transition = {
   type: "tween",
   ease: [0.16, 1, 0.3, 1],
@@ -80,7 +80,7 @@ export default function FluidProcessSteps() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={layoutTransition}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-8"
+          className="flex flex-col md:flex-row md:items-end justify-between gap-8 transform-gpu"
         >
           <div className="max-w-3xl">
             <h2 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95]">
@@ -111,12 +111,12 @@ export default function FluidProcessSteps() {
               role="button"
               aria-expanded={isActive}
               transition={{ layout: layoutTransition }}
-              style={{ willChange: "auto" }}
+              // will-change-transform y transform-gpu fuerzan el hardware acceleration
               className={`
                 relative cursor-pointer overflow-hidden rounded-[2rem] md:rounded-[2.5rem]
                 bg-gradient-to-br ${step.bgGradient}
                 border border-black/[0.04] shadow-inner focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/50
-                group flex flex-col transition-colors duration-500
+                group flex flex-col transition-colors duration-500 transform-gpu will-change-transform
                 ${isActive 
                   ? 'flex-[0.7] h-auto min-h-[420px] md:min-h-0' 
                   : 'flex-[0.1] h-[84px] md:h-auto hover:bg-gray-100/50'
@@ -128,7 +128,7 @@ export default function FluidProcessSteps() {
                 layout="position"
                 transition={{ layout: layoutTransition }}
                 className={`
-                  p-5 md:p-8 flex items-center justify-between z-20 shrink-0
+                  p-5 md:p-8 flex items-center justify-between z-20 shrink-0 transform-gpu
                   ${isActive ? 'flex-row' : 'flex-row md:flex-col md:justify-start md:h-full md:gap-6'}
                 `}
               >
@@ -158,19 +158,17 @@ export default function FluidProcessSteps() {
               <AnimatePresence>
                 {isActive && (
                   <motion.div
-                    // Animación de salida extremadamente rápida para evitar layout shifts en móviles
-                    initial={{ opacity: 0, filter: "blur(8px)", scale: 0.98 }}
+                    initial={{ opacity: 0, filter: "blur(4px)", scale: 0.98 }}
                     animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
                     exit={{ opacity: 0, transition: { duration: 0.1 } }}
-                    transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                    className="absolute inset-x-0 bottom-0 p-4 md:p-8 z-30 h-full flex flex-col justify-end pointer-events-none"
+                    transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute inset-x-0 bottom-0 p-4 md:p-8 z-30 h-full flex flex-col justify-end pointer-events-none transform-gpu"
                   >
-                    {/* Contenedor fluido, se elimina el min-w rígido para garantizar la vista en iPhone SE y dispositivos de 320px */}
-                    <div className="relative overflow-hidden bg-white/80 backdrop-blur-2xl border border-white/80 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-12 shadow-[0_8px_40px_rgba(0,0,0,0.06)] h-full flex flex-col md:flex-row gap-6 md:gap-12 w-full max-w-full pointer-events-auto">
+                    <div className="relative overflow-hidden bg-white/80 backdrop-blur-xl md:backdrop-blur-2xl border border-white/80 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-12 shadow-[0_8px_40px_rgba(0,0,0,0.06)] h-full flex flex-col md:flex-row gap-6 md:gap-12 w-full max-w-full pointer-events-auto transform-gpu">
                       
-                      {/* Textura de Ruido SVG */}
+                      {/* Textura de Ruido SVG: Oculta en móviles (hidden md:block) para evitar lag de repintado */}
                       <div 
-                        className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
+                        className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none hidden md:block"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
                       />
 
@@ -200,7 +198,6 @@ export default function FluidProcessSteps() {
                           }}
                           className="flex flex-col h-full justify-between"
                         >
-                          {/* El pb-3 y -mb-3 garantizan que los trazos de la 'g', 'p' o 'q' no se corten con el overflow-hidden */}
                           <div className="overflow-hidden pb-3 -mb-3 mb-4 md:mb-6 mt-auto">
                             <motion.h3 
                               variants={textRevealVariants}
@@ -223,7 +220,7 @@ export default function FluidProcessSteps() {
                 )}
               </AnimatePresence>
 
-              {/* Decoración de Fondo Abstracta */}
+              {/* Decoración de Fondo Abstracta (Mix-blend eliminado en móvil para rendimiento) */}
               <AnimatePresence>
                 {isActive && (
                   <motion.div 
@@ -231,9 +228,9 @@ export default function FluidProcessSteps() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0, transition: { duration: 0.1 } }}
                     transition={{ duration: 0.8 }}
-                    className="absolute inset-0 z-10 pointer-events-none mix-blend-multiply"
+                    className="absolute inset-0 z-10 pointer-events-none md:mix-blend-multiply"
                     style={{
-                      background: 'radial-gradient(circle at 70% 30%, rgba(37, 99, 235, 0.12) 0%, transparent 60%)'
+                      background: 'radial-gradient(circle at 70% 30%, rgba(37, 99, 235, 0.10) 0%, transparent 60%)'
                     }}
                   />
                 )}
