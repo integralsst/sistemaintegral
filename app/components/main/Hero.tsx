@@ -2,10 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence, Variants, Transition } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const slides = [
+interface Slide {
+  id: number;
+  image: string;
+}
+
+const slides: Slide[] = [
   { id: 1, image: "/images/Banner1.png" },
   { id: 2, image: "/images/Banner2.png" },
   { id: 3, image: "/images/Banner3.png" },
@@ -13,18 +18,49 @@ const slides = [
 ];
 
 const SLIDE_DURATION = 6000;
+const APPLE_EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { y: 30, opacity: 0, filter: "blur(8px)" },
+  visible: {
+    y: 0,
+    opacity: 1,
+    filter: "blur(0px)",
+    transition: {
+      duration: 1.2,
+      ease: APPLE_EASE,
+    },
+  },
+};
+
+const buttonSpring: Transition = { 
+  type: "spring", 
+  stiffness: 400, 
+  damping: 25 
+};
 
 export default function Hero() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
   }, []);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-  };
+  }, []);
 
   useEffect(() => {
     if (isPaused) return;
@@ -32,24 +68,13 @@ export default function Hero() {
     return () => clearInterval(timer);
   }, [nextSlide, isPaused]);
 
-  const textVariants: Variants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.8,
-        ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
-      },
-    },
-  };
-
   return (
     <section
-      className="relative w-full h-screen min-h-[700px] bg-black overflow-hidden group"
+      className="relative w-full min-h-[100dvh] bg-[#050505] overflow-hidden group font-sans"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
+      {/* Capa de Fondo */}
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={currentSlide}
@@ -62,7 +87,7 @@ export default function Hero() {
           <motion.div
             initial={{ scale: 1.05 }}
             animate={{ scale: 1 }}
-            transition={{ duration: SLIDE_DURATION / 1000, ease: "linear" }}
+            transition={{ duration: 10, ease: "easeOut" }}
             className="w-full h-full relative"
           >
             <Image
@@ -74,106 +99,93 @@ export default function Hero() {
               sizes="100vw"
             />
             
-            <div className="absolute inset-0 bg-black/45 pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none" />
-            <div className="absolute inset-y-0 left-0 w-full md:w-3/4 bg-gradient-to-r from-black/80 via-black/40 to-transparent pointer-events-none" />
+            {/* Scrims de Contraste */}
+            <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent w-full md:w-3/4 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
           </motion.div>
         </motion.div>
       </AnimatePresence>
 
-      {/* FIX DE ESPACIADO: Cambiado a justify-center con pt-32 y pb-10 para que nunca choque con el Navbar */}
-      <div className="absolute inset-0 z-10 flex flex-col justify-center pt-32 pb-10 px-6 md:px-16 container mx-auto pointer-events-none">
+      {/* Contenedor Principal (Con padding superior "pt-32" para respetar el Navbar) */}
+      <div className="absolute inset-0 z-10 flex flex-col justify-center pt-32 pb-16 px-6 md:px-16 container mx-auto pointer-events-none">
         
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-blue-900/15 blur-[120px] rounded-full pointer-events-none -z-10" />
+
         <AnimatePresence mode="wait">
           <motion.div
-            key={`text-${currentSlide}`}
-            variants={textVariants}
+            key={`content-${currentSlide}`}
+            variants={containerVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
             className="relative z-10 max-w-3xl pointer-events-auto"
           >
             
-            <motion.div 
-              className="relative inline-flex items-center gap-3 px-5 py-2.5 mb-8 rounded-full bg-white/5 backdrop-blur-md border border-white/10 shadow-[0_4px_24px_-8px_rgba(0,0,0,0.5)] overflow-hidden group/pill cursor-default"
-              initial={{ opacity: 0, y: 15, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <motion.div 
-                className="absolute inset-0 w-[200%] bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 z-0"
-                animate={{ x: ["-100%", "50%"] }}
-                transition={{ repeat: Infinity, duration: 3, ease: "easeInOut", repeatDelay: 1 }}
-              />
-              <div className="relative flex h-2.5 w-2.5 z-10">
-                <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-sis-light)] opacity-75"></div>
-                <div className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--color-sis-light)] shadow-[0_0_8px_var(--color-sis-light)]"></div>
-              </div>
-              <span className="relative z-10 text-white/90 font-semibold tracking-widest text-xs md:text-sm uppercase drop-shadow-md">
-                Gestión Integral SG-SST
-              </span>
-            </motion.div>
-            
-            <h1 
-              className="text-white text-5xl md:text-7xl lg:text-[5.5rem] font-bold leading-[1.05] tracking-tight mb-6"
-              style={{ textShadow: "0px 4px 16px rgba(0,0,0,0.8)" }}
+            {/* Título Redimensionado a text-[5rem] para mejor encuadre */}
+            <motion.h1 
+              variants={itemVariants}
+              className="text-white text-5xl md:text-6xl lg:text-[5rem] font-extrabold leading-[1.02] tracking-tighter mb-6"
+              style={{ textShadow: "0px 10px 30px rgba(0,0,0,0.8)" }}
             >
               Cumplimiento Legal.<br />
-              Sin Complicaciones.
-            </h1>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-gray-300 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                Sin Complicaciones.
+              </span>
+            </motion.h1>
 
-            <p className="text-gray-200 text-lg md:text-xl font-light leading-relaxed max-w-2xl mb-10 drop-shadow-lg">
-              Diseñamos, implementamos y auditamos tu Sistema de Gestión para proteger a tu equipo y blindar tu empresa ante las normativas.
-            </p>
+            <motion.p 
+              variants={itemVariants}
+              className="text-gray-300 text-lg md:text-xl font-normal leading-relaxed max-w-2xl mb-10"
+              style={{ textShadow: "0px 2px 8px rgba(0,0,0,0.9)" }}
+            >
+              Diseñamos, implementamos y auditamos tu Sistema de Gestión para proteger a tu equipo y blindar tu empresa ante las normativas de riesgos laborales.
+            </motion.p>
             
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button className="px-8 py-4 rounded-full bg-white text-black font-semibold text-base hover:scale-105 transition-all duration-300 shadow-xl">
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-5">
+              <motion.button 
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.96 }}
+                transition={buttonSpring}
+                className="px-8 py-4 rounded-full bg-white text-black font-bold text-base shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] transition-shadow"
+              >
                 Solicitar Asesoría
-              </button>
-              <button className="px-8 py-4 rounded-full bg-white/10 backdrop-blur-sm border border-white/30 text-white font-medium text-base hover:bg-white/20 hover:border-white/50 transition-all duration-300">
+              </motion.button>
+              <motion.button 
+                whileHover={{ scale: 1.03, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                whileTap={{ scale: 0.96 }}
+                transition={buttonSpring}
+                className="px-8 py-4 rounded-full bg-transparent backdrop-blur-md border border-white/30 text-white font-semibold text-base transition-colors"
+              >
                 Conocer Servicios
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           </motion.div>
         </AnimatePresence>
-
       </div>
 
-      <div className="absolute right-6 bottom-10 md:bottom-20 z-20 flex gap-4">
-        <button
+      {/* Controles de Navegación Simplificados */}
+      <div className="absolute right-6 bottom-10 md:bottom-12 z-20 flex gap-4 pointer-events-auto">
+        <motion.button
           onClick={prevSlide}
-          className="w-12 h-12 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-md border border-white/20 text-white hover:bg-white/40 hover:scale-110 transition-all duration-300"
+          whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 255, 255, 0.15)" }}
+          whileTap={{ scale: 0.9 }}
+          transition={buttonSpring}
+          className="w-14 h-14 flex items-center justify-center rounded-full bg-black/20 backdrop-blur-2xl border border-white/10 text-white shadow-xl"
           aria-label="Anterior banner"
         >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <button
+          <ChevronLeft className="w-6 h-6 opacity-90" />
+        </motion.button>
+        <motion.button
           onClick={nextSlide}
-          className="w-12 h-12 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-md border border-white/20 text-white hover:bg-white/40 hover:scale-110 transition-all duration-300"
+          whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 255, 255, 0.15)" }}
+          whileTap={{ scale: 0.9 }}
+          transition={buttonSpring}
+          className="w-14 h-14 flex items-center justify-center rounded-full bg-black/20 backdrop-blur-2xl border border-white/10 text-white shadow-xl"
           aria-label="Siguiente banner"
         >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
-
-      <div className="absolute left-6 md:left-16 bottom-10 md:bottom-12 z-20 flex gap-2">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            className="relative w-12 md:w-16 h-1 rounded-full bg-white/30 overflow-hidden"
-            aria-label={`Ir al banner ${index + 1}`}
-          >
-            {index === currentSlide && (
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                transition={{ duration: SLIDE_DURATION / 1000, ease: "linear" }}
-                className="absolute top-0 left-0 h-full bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-              />
-            )}
-          </button>
-        ))}
+          <ChevronRight className="w-6 h-6 opacity-90" />
+        </motion.button>
       </div>
     </section>
   );
