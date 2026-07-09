@@ -118,7 +118,7 @@ export default function Navbar() {
           
           <Link href="/" className="relative z-50 flex items-center group" onClick={() => setIsMobileMenuOpen(false)}>
             <Image 
-              src="/images/Logo.png" 
+              src="/images/logo.png" 
               alt="Logo SIS" 
               width={120} 
               height={40} 
