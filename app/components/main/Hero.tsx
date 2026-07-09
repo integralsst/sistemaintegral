@@ -117,14 +117,15 @@ export default function Hero() {
           animate="visible"
           className="relative z-10 max-w-3xl pointer-events-auto w-full flex flex-col items-center text-center md:items-start md:text-left"
         >
+          {/* NUEVO COPY: Frases ultra-cortas que jamás se romperán en móvil */}
           <motion.h1 
             variants={itemVariants}
-            className="text-white text-[2.75rem] leading-[1.05] sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold md:leading-[1.02] tracking-tight md:tracking-tighter mb-5 md:mb-6"
+            className="text-white text-[3rem] leading-[1.05] sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold md:leading-[1.02] tracking-tight md:tracking-tighter mb-5 md:mb-6"
             style={{ textShadow: "0px 10px 30px rgba(0,0,0,0.8)" }}
           >
-            <span className="block">Gestión SG-SST.</span>
+            <span className="block">Cumplimiento SST.</span>
             <span className="block mt-1 md:mt-2 bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-gray-400 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-              Cumplimiento Estratégico.
+              Hecho Simple.
             </span>
           </motion.h1>
 
