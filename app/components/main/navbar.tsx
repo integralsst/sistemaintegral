@@ -33,7 +33,7 @@ const servicios = [
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false); // NUEVO ESTADO: Detecta si hemos bajado
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isServicesHovered, setIsServicesHovered] = useState(false);
   
   const pathname = usePathname();
@@ -45,14 +45,12 @@ export default function Navbar() {
     const previous = scrollY.getPrevious() ?? 0;
     if (isMobileMenuOpen) return;
     
-    // 1. Ocultar el Navbar al bajar rápido
     if (latest > previous && latest > 150) {
       setIsHidden(true);
     } else {
       setIsHidden(false);
     }
 
-    // 2. Conciencia de Scroll: Mutar colores al pasar los primeros 50px
     if (latest > 50) {
       setIsScrolled(true);
     } else {
@@ -68,8 +66,6 @@ export default function Navbar() {
     }
   }, [isMobileMenuOpen]);
 
-  // LA REGLA MAESTRA: 
-  // Es modo oscuro (cristal transparente, texto blanco) SOLO si estamos en el Inicio Y NO hemos bajado la pantalla.
   const isTransparentMode = isHome && !isScrolled;
 
   const navBgClass = isTransparentMode 
@@ -98,7 +94,7 @@ export default function Navbar() {
 
   const mobileMenuVariants: Variants = {
     closed: { opacity: 0, transition: { staggerChildren: 0.05, staggerDirection: -1 } },
-    open: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } }
+    open: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.1 } }
   };
 
   const mobileItemVariants: Variants = {
@@ -109,7 +105,7 @@ export default function Navbar() {
   return (
     <>
       <motion.nav 
-        className="fixed top-0 inset-x-0 z-[100] px-4 md:px-8 py-6"
+        className="fixed top-0 inset-x-0 z-[100] px-4 md:px-8 py-6 will-change-transform"
         initial={{ y: -100 }}
         animate={{ y: isHidden ? -100 : 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
@@ -122,7 +118,6 @@ export default function Navbar() {
               alt="Logo SIS" 
               width={120} 
               height={40} 
-              // Mutación suave del color del logo
               className={`w-auto h-8 object-contain transition-all duration-500 group-hover:scale-105 ${!isTransparentMode ? 'brightness-0' : ''}`} 
               priority
             />
@@ -216,8 +211,8 @@ export default function Navbar() {
               closed: { opacity: 0, backdropFilter: "blur(0px)" },
               open: { opacity: 1, backdropFilter: "blur(40px)" }
             }}
-            transition={{ duration: 0.4 }}
-            className="fixed inset-0 z-[90] bg-black/80 flex flex-col pt-32 px-6 pb-12 overflow-y-auto"
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[90] bg-black/90 flex flex-col pt-32 px-6 pb-12 overflow-y-auto will-change-transform"
           >
             <motion.div variants={mobileMenuVariants} className="flex flex-col gap-8">
               <motion.div variants={mobileItemVariants}>
@@ -227,7 +222,7 @@ export default function Navbar() {
               </motion.div>
               
               <motion.div variants={mobileItemVariants} className="flex flex-col gap-5">
-                <span className="text-sm font-bold text-[var(--color-sis-light)] tracking-widest uppercase">
+                <span className="text-sm font-bold text-blue-500 tracking-widest uppercase">
                   Servicios
                 </span>
                 <div className="flex flex-col gap-4">
@@ -260,10 +255,10 @@ export default function Navbar() {
               </motion.div>
 
               <motion.div variants={mobileItemVariants} className="flex gap-4 pt-8 mt-auto">
-                <a href="#" className="p-4 bg-white/10 rounded-full text-white hover:bg-[var(--color-sis-light)] transition-colors">
+                <a href="#" className="p-4 bg-white/10 rounded-full text-white hover:bg-blue-500 transition-colors">
                   <Instagram className="w-6 h-6" />
                 </a>
-                <a href="#" className="p-4 bg-white/10 rounded-full text-white hover:bg-[var(--color-sis-light)] transition-colors">
+                <a href="#" className="p-4 bg-white/10 rounded-full text-white hover:bg-blue-500 transition-colors">
                   <Linkedin className="w-6 h-6" />
                 </a>
               </motion.div>

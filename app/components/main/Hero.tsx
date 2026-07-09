@@ -71,7 +71,6 @@ export default function Hero() {
   };
 
   return (
-    // FIX DE SCROLL: min-h-[100svh] previene el salto al ocultarse la barra del navegador
     <section className="relative w-full min-h-[100svh] bg-[#050505] overflow-hidden font-sans">
       
       <motion.div 
@@ -82,7 +81,8 @@ export default function Hero() {
         onDragEnd={handleDragEnd}
       />
 
-      <AnimatePresence mode="popLayout" initial={false}>
+      {/* FIX: Eliminado el mode="popLayout" redundante y el escalado para estabilizar GPU en móviles */}
+      <AnimatePresence initial={false}>
         <motion.div
           key={currentSlide}
           initial={{ opacity: 0 }}
@@ -91,12 +91,7 @@ export default function Hero() {
           transition={{ duration: 1.2, ease: "easeInOut" }}
           className="absolute inset-0 w-full h-full z-0 pointer-events-none"
         >
-          <motion.div
-            initial={{ scale: 1.05 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 10, ease: "easeOut" }}
-            className="w-full h-full relative"
-          >
+          <div className="w-full h-full relative">
             <Image
               src={slides[currentSlide].image}
               alt={`Banner SG-SST ${slides[currentSlide].id}`}
@@ -109,7 +104,7 @@ export default function Hero() {
             <div className="absolute inset-0 bg-black/10" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 md:via-transparent to-transparent md:bg-gradient-to-r md:from-black/90 md:via-black/50 md:w-3/4" />
             <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-          </motion.div>
+          </div>
         </motion.div>
       </AnimatePresence>
 
@@ -117,7 +112,6 @@ export default function Hero() {
         
         <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-blue-900/15 blur-[120px] rounded-full -z-10" />
 
-        {/* ALINEACIÓN: items-center y text-center para móvil, retornando a md:items-start md:text-left en desktop */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -141,7 +135,6 @@ export default function Hero() {
             style={{ textShadow: "0px 2px 8px rgba(0,0,0,0.9)" }}
           >
             Diseñamos, implementamos y auditamos tu Sistema de Gestión
-            {/* REDUCCIÓN DE TEXTO: Esto se oculta en móvil y aparece en md (desktop) */}
             <span className="hidden md:inline"> para proteger a tu equipo y blindar tu empresa ante las normativas de riesgos laborales</span>.
           </motion.p>
           
