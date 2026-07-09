@@ -21,21 +21,24 @@ const SLIDE_DURATION = 6000;
 const APPLE_EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 const SWIPE_CONFIDENCE_THRESHOLD = 10000;
 
+// ANIMACIÓN WOW: Retraso inicial para dejar que el fondo cargue, luego revelación en cascada.
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.15, delayChildren: 0.2 },
+    transition: { staggerChildren: 0.15, delayChildren: 0.3 },
   },
 };
 
+// ANIMACIÓN WOW: Desenfoque profundo, hundimiento de escala (0.9) y mayor desplazamiento vertical.
 const itemVariants: Variants = {
-  hidden: { y: 30, opacity: 0, filter: "blur(8px)" },
+  hidden: { y: 50, opacity: 0, scale: 0.9, filter: "blur(15px)" },
   visible: {
     y: 0,
     opacity: 1,
+    scale: 1,
     filter: "blur(0px)",
-    transition: { duration: 1.2, ease: APPLE_EASE },
+    transition: { duration: 1.4, ease: APPLE_EASE },
   },
 };
 
@@ -81,7 +84,6 @@ export default function Hero() {
         onDragEnd={handleDragEnd}
       />
 
-      {/* FIX: Eliminado el mode="popLayout" redundante y el escalado para estabilizar GPU en móviles */}
       <AnimatePresence initial={false}>
         <motion.div
           key={currentSlide}
@@ -120,25 +122,26 @@ export default function Hero() {
         >
           <motion.h1 
             variants={itemVariants}
-            className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-[5rem] font-extrabold leading-[1.05] tracking-tight md:tracking-tighter mb-4 md:mb-6"
+            className="text-white text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-[5rem] font-extrabold md:leading-[1.05] tracking-tight md:tracking-tighter mb-5 md:mb-6"
             style={{ textShadow: "0px 10px 30px rgba(0,0,0,0.8)" }}
           >
-            Cumplimiento Legal.<br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-gray-300 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+            Cumplimiento Legal.
+            {/* FIX: Uso de 'block md:inline' para forzar el salto limpio en móvil sin que se corte feo, uniéndose en desktop */}
+            <span className="block md:inline mt-1 md:mt-0 bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-gray-300 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
               Sin Complicaciones.
             </span>
           </motion.h1>
 
           <motion.p 
             variants={itemVariants}
-            className="text-gray-300 text-base sm:text-lg md:text-xl font-normal leading-relaxed max-w-2xl mb-8 md:mb-10"
+            className="text-gray-300 text-[15px] sm:text-lg md:text-xl font-normal leading-relaxed max-w-[90%] md:max-w-2xl mx-auto md:mx-0 mb-8 md:mb-10"
             style={{ textShadow: "0px 2px 8px rgba(0,0,0,0.9)" }}
           >
             Diseñamos, implementamos y auditamos tu Sistema de Gestión
             <span className="hidden md:inline"> para proteger a tu equipo y blindar tu empresa ante las normativas de riesgos laborales</span>.
           </motion.p>
           
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 md:gap-5 w-full max-w-[280px] sm:max-w-none items-center">
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 md:gap-5 w-full sm:w-auto items-center">
             <motion.button 
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.96 }}
