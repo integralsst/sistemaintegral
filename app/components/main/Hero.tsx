@@ -41,7 +41,6 @@ const itemVariants: Variants = {
 
 const buttonSpring: Transition = { type: "spring", stiffness: 400, damping: 25 };
 
-// Función para calcular la fuerza del swipe
 const swipePower = (offset: number, velocity: number) => {
   return Math.abs(offset) * velocity;
 };
@@ -62,7 +61,6 @@ export default function Hero() {
     return () => clearInterval(timer);
   }, [nextSlide]);
 
-  // Manejador del final del gesto táctil (Swipe)
   const handleDragEnd = (e: MouseEvent | TouchEvent | PointerEvent, { offset, velocity }: PanInfo) => {
     const swipe = swipePower(offset.x, velocity.x);
     if (swipe < -SWIPE_CONFIDENCE_THRESHOLD) {
@@ -73,9 +71,9 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative w-full min-h-[100dvh] bg-[#050505] overflow-hidden font-sans">
+    // FIX DE SCROLL: min-h-[100svh] previene el salto al ocultarse la barra del navegador
+    <section className="relative w-full min-h-[100svh] bg-[#050505] overflow-hidden font-sans">
       
-      {/* Capa de Gestos Móviles (Swipe) */}
       <motion.div 
         className="absolute inset-0 z-20 touch-pan-y md:hidden" 
         drag="x"
@@ -103,12 +101,11 @@ export default function Hero() {
               src={slides[currentSlide].image}
               alt={`Banner SG-SST ${slides[currentSlide].id}`}
               fill
-              className="object-cover object-[center_top] md:object-center" // Ajuste responsivo de imagen
+              className="object-cover object-[center_top] md:object-center"
               priority={currentSlide === 0}
               sizes="100vw"
             />
             
-            {/* Scrims de Contraste adaptativos */}
             <div className="absolute inset-0 bg-black/10" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 md:via-transparent to-transparent md:bg-gradient-to-r md:from-black/90 md:via-black/50 md:w-3/4" />
             <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
@@ -116,17 +113,17 @@ export default function Hero() {
         </motion.div>
       </AnimatePresence>
 
-      <div className="absolute inset-0 z-10 flex flex-col justify-end pb-24 md:justify-center md:pt-32 md:pb-16 px-6 md:px-16 container mx-auto pointer-events-none">
+      <div className="absolute inset-0 z-10 flex flex-col justify-end pb-28 md:justify-center md:pt-32 md:pb-16 px-6 md:px-16 container mx-auto pointer-events-none">
         
         <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-blue-900/15 blur-[120px] rounded-full -z-10" />
 
+        {/* ALINEACIÓN: items-center y text-center para móvil, retornando a md:items-start md:text-left en desktop */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="relative z-10 max-w-3xl pointer-events-auto"
+          className="relative z-10 max-w-3xl pointer-events-auto w-full flex flex-col items-center text-center md:items-start md:text-left"
         >
-          {/* Tipografía adaptativa */}
           <motion.h1 
             variants={itemVariants}
             className="text-white text-4xl sm:text-5xl md:text-6xl lg:text-[5rem] font-extrabold leading-[1.05] tracking-tight md:tracking-tighter mb-4 md:mb-6"
@@ -143,11 +140,12 @@ export default function Hero() {
             className="text-gray-300 text-base sm:text-lg md:text-xl font-normal leading-relaxed max-w-2xl mb-8 md:mb-10"
             style={{ textShadow: "0px 2px 8px rgba(0,0,0,0.9)" }}
           >
-            Diseñamos, implementamos y auditamos tu Sistema de Gestión para proteger a tu equipo y blindar tu empresa ante las normativas de riesgos laborales.
+            Diseñamos, implementamos y auditamos tu Sistema de Gestión
+            {/* REDUCCIÓN DE TEXTO: Esto se oculta en móvil y aparece en md (desktop) */}
+            <span className="hidden md:inline"> para proteger a tu equipo y blindar tu empresa ante las normativas de riesgos laborales</span>.
           </motion.p>
           
-          {/* Botones adaptativos */}
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 md:gap-5 w-full sm:w-auto">
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 md:gap-5 w-full max-w-[280px] sm:max-w-none items-center">
             <motion.button 
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.96 }}
@@ -168,7 +166,6 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      {/* Flechas ocultas en móvil (hidden md:flex) */}
       <div className="hidden md:flex absolute right-6 bottom-10 md:bottom-12 z-20 gap-4 pointer-events-auto">
         <motion.button
           onClick={prevSlide}
@@ -192,8 +189,7 @@ export default function Hero() {
         </motion.button>
       </div>
 
-      {/* Puntos de paginación visibles en móvil y desktop */}
-      <div className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-16 bottom-6 md:bottom-12 z-20 flex gap-2.5 pointer-events-auto">
+      <div className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-16 bottom-8 md:bottom-12 z-20 flex gap-2.5 pointer-events-auto">
         {slides.map((_, index) => (
           <button
             key={index}
