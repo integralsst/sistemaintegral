@@ -1,163 +1,192 @@
 "use client";
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, Variants } from 'framer-motion';
-import { 
-  ArrowRight, 
-  FileText,
-  ShieldCheck,
-  Flame,
-  Briefcase
-} from "lucide-react";
+import { motion, useScroll, useTransform, Variants } from 'framer-motion';
+import { ArrowRight, FileText, ShieldCheck, Flame, Briefcase } from "lucide-react";
+
+interface ServiceCategory {
+  id: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  imagePath: string;
+  span: string; 
+}
+
+const serviceCategories: ServiceCategory[] = [
+  {
+    id: "gestion-documental",
+    icon: <FileText size={28} strokeWidth={1.5} />,
+    title: "Gestión Documental",
+    description: "Estructuración normativa, diseño de políticas y consolidación del SG-SST alineado a la legislación vigente de manera impecable.",
+    imagePath: "/images/gestion-documental.webp",
+    span: "md:col-span-12 lg:col-span-8" // Tarjeta Ancha
+  },
+  {
+    id: "gestion-a-la-intervencion",
+    icon: <ShieldCheck size={28} strokeWidth={1.5} />,
+    title: "Intervención Operativa",
+    description: "Inspecciones y evaluación continua de riesgos en tiempo real.",
+    imagePath: "/images/intervencion.webp",
+    span: "md:col-span-12 lg:col-span-4" // Tarjeta Cuadrada
+  },
+  {
+    id: "gestion-a-emergencias",
+    icon: <Flame size={28} strokeWidth={1.5} />,
+    title: "Gestión a Emergencias",
+    description: "Formación táctica de brigadas y simulacros de alta precisión.",
+    imagePath: "/images/emergencias.webp",
+    span: "md:col-span-12 lg:col-span-4" // Tarjeta Cuadrada
+  },
+  {
+    id: "gestion-especializada",
+    icon: <Briefcase size={28} strokeWidth={1.5} />,
+    title: "Gestión Especializada",
+    description: "Asesoría avanzada en tareas de alto riesgo, riesgo psicosocial, higiene industrial y vigilancia epidemiológica para empresas.",
+    imagePath: "/images/especializada.webp",
+    span: "md:col-span-12 lg:col-span-8" // Tarjeta Ancha
+  }
+];
+
+const APPLE_EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
+
+const headerVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0, transition: { duration: 1, ease: APPLE_EASE } }
+};
 
 export default function Services() {
-  const serviceCategories = [
-    {
-      id: "gestion-documental",
-      icon: <FileText size={24} />,
-      title: "Gestión Documental",
-      description: "Estructuración normativa, diseño de políticas, reglamentos y consolidación del SG-SST alineado a la legislación vigente.",
-      imagePath: "/images/gestion-documental.webp" 
-    },
-    {
-      id: "gestion-a-la-intervencion",
-      icon: <ShieldCheck size={24} />,
-      title: "Gestión a la Intervención",
-      description: "Ejecución de inspecciones, controles operativos locativos y evaluación continua de riesgos en el entorno de trabajo.",
-      imagePath: "/images/intervencion.webp" 
-    },
-    {
-      id: "gestion-a-emergencias",
-      icon: <Flame size={24} />,
-      title: "Gestión a Emergencias",
-      description: "Preparación táctica mediante formación de brigadas, planes de evacuación, simulacros y manejo de contingencias.",
-      imagePath: "/images/emergencias.webp" 
-    },
-    {
-      id: "gestion-especializada",
-      icon: <Briefcase size={24} />,
-      title: "Gestión Especializada",
-      description: "Asesoría avanzada en tareas de alto riesgo, riesgo psicosocial, higiene industrial y vigilancia epidemiológica, dirigida a ARL y empresas.",
-      imagePath: "/images/especializada.webp" 
-    }
-  ];
+  const containerRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  });
 
-  // Variantes de animación
-  const gridVariants: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15, delayChildren: 0.1 }
-    }
-  };
-
-  const cardVariants: Variants = {
-    hidden: { opacity: 0, y: 40, scale: 0.98 },
-    show: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: { type: "spring", stiffness: 80, damping: 20 }
-    }
-  };
+  // Efecto Parallax para luces de fondo
+  const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
   return (
-   <section id="servicios" className="w-full pt-16 pb-32 px-4 sm:px-6 lg:px-8 relative z-10 bg-white overflow-hidden">
-      <div className="max-w-[1400px] mx-auto flex flex-col items-center text-center">
+    <section 
+      id="servicios" 
+      ref={containerRef}
+      // Fondo Apple Light Mode
+      className="relative w-full py-24 md:py-32 px-4 sm:px-6 lg:px-8 bg-[#fbfbfd] overflow-hidden font-sans"
+    >
+      {/* Luces Volumétricas adaptadas para fondo claro */}
+      <motion.div style={{ y: yBg }} className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-400/10 rounded-full blur-[120px]" />
+      </motion.div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/10 text-blue-700 font-semibold text-sm tracking-wide mb-8"
-        >
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-600 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-          </span>
-          Operación a Nivel Nacional
-        </motion.div>
+      <div className="relative z-10 max-w-[1400px] mx-auto flex flex-col items-center">
 
-        {/* Título corregido con la paleta de colores solicitada */}
-        <motion.h1 
-          initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="text-4xl sm:text-6xl lg:text-[5rem] font-black leading-[1] tracking-tighter text-gray-950 mb-8 max-w-5xl"
-        >
-          Seguridad y Salud en el Trabajo. <br className="hidden md:block" />
-          <span className="bg-gradient-to-r from-cyan-300 to-blue-600 text-transparent bg-clip-text">
-            Llevada al Siguiente Nivel.
-          </span>
-        </motion.h1>
-
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="text-xl md:text-2xl text-gray-500 font-medium max-w-3xl leading-relaxed tracking-tight mb-20"
-        >
-          Automatiza las inspecciones y gestiona riesgos en tiempo real con un ecosistema integral diseñado para la protección absoluta de tu organización.
-        </motion.p>
-
-        <motion.div 
-          variants={gridVariants}
+        {/* Encabezado */}
+        <motion.div
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 w-full text-left"
+          viewport={{ once: true, margin: "-100px" }}
+          className="flex flex-col items-center text-center mb-20 w-full"
         >
+          <motion.div variants={headerVariants} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/10 border border-blue-600/15 text-blue-700 font-semibold text-xs md:text-sm tracking-widest uppercase mb-8 backdrop-blur-md">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-600 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+            </span>
+            Ecosistema Integral
+          </motion.div>
+
+          <motion.h2 
+            variants={headerVariants}
+            className="text-[#1d1d1f] text-4xl sm:text-5xl md:text-7xl font-extrabold leading-[1.05] tracking-tighter mb-6 max-w-4xl"
+          >
+            Protección de Alto Nivel.<br />
+            {/* Gradiente oscuro/intenso para contrastar con el fondo blanco */}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500">
+              Diseñada para Escalar.
+            </span>
+          </motion.h2>
+
+          <motion.p 
+            variants={headerVariants}
+            className="text-[#86868b] text-lg md:text-2xl font-normal max-w-2xl leading-relaxed tracking-tight"
+          >
+            Nuestros módulos especializados cubren cada ángulo del SG-SST, transformando la burocracia en una ventaja competitiva automatizada.
+          </motion.p>
+        </motion.div>
+
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 w-full">
           {serviceCategories.map((category, index) => (
-            <motion.div key={index} variants={cardVariants} className="h-full">
+            <motion.div 
+              key={category.id} 
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.8, delay: index * 0.1, ease: APPLE_EASE }}
+              className={`${category.span} group h-[450px] md:h-[500px] will-change-transform`}
+            >
               <Link 
                 href={`/servicios/${category.id}`}
-                className="group relative bg-[#f8f8fa] border border-gray-100 rounded-[2rem] md:rounded-[2.5rem] flex flex-col overflow-hidden hover:shadow-2xl hover:shadow-blue-900/10 hover:border-blue-100 hover:-translate-y-2 transition-all duration-500 ease-[cubic-bezier(0.21,0.47,0.32,0.98)] cursor-pointer h-full"
+                // Sombra difusa premium estilo Apple para fondos claros
+                className="relative block w-full h-full rounded-[2.5rem] overflow-hidden bg-white border border-black/[0.04] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.2)] hover:border-black/[0.08] transition-all duration-500"
               >
-                
-                {/* Contenedor de Imagen con Efecto Parallax Suave */}
-                <div className="w-full aspect-[4/3] relative overflow-hidden bg-gray-200">
-                  <div className="absolute inset-0 bg-gray-900/10 group-hover:bg-transparent transition-colors duration-500 z-10" />
+                {/* Capa de Imagen Dinámica */}
+                <motion.div 
+                  className="absolute inset-0 w-full h-full"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 1.5, ease: APPLE_EASE }}
+                >
                   <Image
                     src={category.imagePath}
                     alt={category.title}
                     fill
-                    className="object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000 ease-[cubic-bezier(0.21,0.47,0.32,0.98)]"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    className="object-cover transition-all duration-700"
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
-                </div>
+                  {/* Scrims para asegurar que el texto interior siempre sea legible (blanco sobre oscuro) */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-[#050505]/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent opacity-80" />
+                </motion.div>
 
-                <div className="p-8 flex flex-col flex-grow bg-white/50 backdrop-blur-sm">
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="p-2.5 bg-white rounded-xl shadow-sm text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-500">
-                      {category.icon}
+                {/* Contenido Flotante (Glassmorphism UI adaptado) */}
+                <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-end z-20">
+                  <motion.div 
+                    initial={{ y: 20 }}
+                    whileHover={{ y: 0 }}
+                    transition={{ duration: 0.5, ease: APPLE_EASE }}
+                    className="flex flex-col"
+                  >
+                    <div className="flex items-center gap-4 mb-4">
+                      {/* Icono con Glassmorphism */}
+                      <div className="p-3 bg-white/20 backdrop-blur-xl border border-white/20 rounded-2xl text-white group-hover:bg-white group-hover:text-blue-600 transition-all duration-500 shadow-lg">
+                        {category.icon}
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight drop-shadow-md">
+                        {category.title}
+                      </h3>
                     </div>
-                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight leading-tight">
-                      {category.title}
-                    </h3>
-                  </div>
-                  
-                  <p className="text-gray-500 font-medium text-[15px] leading-relaxed mb-8 flex-grow">
-                    {category.description}
-                  </p>
-                  
-                  <div className="mt-auto flex items-center justify-between text-blue-600 font-bold text-[15px]">
-                    <span className="opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 ease-[cubic-bezier(0.21,0.47,0.32,0.98)]">
-                      Saber más
-                    </span>
-                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-blue-50 transition-colors duration-500">
-                      <ArrowRight size={18} className="transform -rotate-45 group-hover:rotate-0 transition-transform duration-500" />
+                    
+                    <p className="text-gray-200 font-normal text-base md:text-lg leading-relaxed max-w-lg mb-6 line-clamp-3 drop-shadow-sm">
+                      {category.description}
+                    </p>
+
+                    {/* Botón Magnético Interactivo */}
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:border-white transition-all duration-500 shadow-md">
+                        <ArrowRight size={18} className="text-white group-hover:text-blue-600 transform -rotate-45 group-hover:rotate-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]" />
+                      </div>
+                      <span className="font-semibold text-white/0 -translate-x-4 group-hover:translate-x-0 group-hover:text-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] drop-shadow-md">
+                        Explorar solución
+                      </span>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </Link>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
 
       </div>
     </section>
