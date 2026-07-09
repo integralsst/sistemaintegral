@@ -21,8 +21,6 @@ const SLIDE_DURATION = 6000;
 const APPLE_EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 const SWIPE_CONFIDENCE_THRESHOLD = 10000;
 
-// ANIMACIÓN CORREGIDA: Eliminación de 'blur' para asegurar el renderizado en móviles (WebKit bug fix).
-// Uso estricto de transformaciones GPU-friendly.
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -75,7 +73,6 @@ export default function Hero() {
   return (
     <section className="relative w-full min-h-[100svh] bg-[#050505] overflow-hidden font-sans">
       
-      {/* Capa de control táctil (Swipe en móvil) */}
       <motion.div 
         className="absolute inset-0 z-20 touch-pan-y md:hidden" 
         drag="x"
@@ -84,7 +81,6 @@ export default function Hero() {
         onDragEnd={handleDragEnd}
       />
 
-      {/* Renderizado del Carrusel de Fondo */}
       <AnimatePresence initial={false}>
         <motion.div
           key={currentSlide}
@@ -121,7 +117,6 @@ export default function Hero() {
           animate="visible"
           className="relative z-10 max-w-3xl pointer-events-auto w-full flex flex-col items-center text-center md:items-start md:text-left"
         >
-          {/* NUEVO COPY: Metricas simétricas, directo al SG-SST */}
           <motion.h1 
             variants={itemVariants}
             className="text-white text-[2.75rem] leading-[1.05] sm:text-5xl md:text-6xl lg:text-[5.5rem] font-extrabold md:leading-[1.02] tracking-tight md:tracking-tighter mb-5 md:mb-6"
@@ -129,7 +124,7 @@ export default function Hero() {
           >
             <span className="block">Gestión SG-SST.</span>
             <span className="block mt-1 md:mt-2 bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-gray-400 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-              Sin Complicaciones.
+              Cumplimiento Estratégico.
             </span>
           </motion.h1>
 
