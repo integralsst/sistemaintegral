@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import ShareArticleButton from "@/app/components/main/ui/ShareArticleButton";
 import DOMPurify from 'isomorphic-dompurify';
 
+// OJO: Si estás probando y editando rápido, puedes comentar esto temporalmente
 export const revalidate = 60; 
 
 type Params = Promise<{ slug: string }>;
@@ -14,11 +15,25 @@ type Params = Promise<{ slug: string }>;
 export default async function PostDetailPage({ params }: { params: Params }) {
   const { slug } = await params;
 
+  // 1. Decodificar la URL para evitar que caracteres como %20 rompan la búsqueda
+  const decodedSlug = decodeURIComponent(slug);
+
+  // 2. DEBUGGING: Revisa tu terminal de VSCode para ver qué está buscando realmente
+  console.log("🔍 Buscando post con este valor exacto:", decodedSlug);
+
   const post = await prisma.post.findFirst({
-    where: { OR: [{ slug: slug }, ...(isNaN(Number(slug)) ? [] : [{ id: Number(slug) }])] },
+    where: { 
+        OR: [
+            { slug: decodedSlug }, 
+            ...(isNaN(Number(decodedSlug)) ? [] : [{ id: Number(decodedSlug) }])
+        ] 
+    },
   });
 
-  if (!post) return notFound();
+  if (!post) {
+      console.log("❌ No se encontró ningún post en la BD con ese slug/id.");
+      return notFound();
+  }
 
   const formattedDate = new Intl.DateTimeFormat('es-CO', { dateStyle: 'long' }).format(post.createdAt);
 
