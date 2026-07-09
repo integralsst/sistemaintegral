@@ -71,6 +71,8 @@ function sanitizePostContent(content: string) {
       "br",
       "div",
       "span",
+      "colgroup",
+"col",
     ],
     allowedAttributes: {
       a: ["href", "target", "rel", "class", "style"],
@@ -92,6 +94,8 @@ function sanitizePostContent(content: string) {
       ol: ["class", "style"],
       li: ["class", "style"],
       blockquote: ["class", "style"],
+      colgroup: ["class", "style"],
+col: ["class", "style", "span", "width"],
     },
     allowedSchemes: ["http", "https", "mailto", "tel"],
   });
