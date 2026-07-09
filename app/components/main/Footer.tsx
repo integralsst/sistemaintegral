@@ -253,7 +253,7 @@ export default function Footer() {
             transition={{ duration: 1 }}
             className="text-[14vw] font-black tracking-tighter text-white whitespace-nowrap leading-none"
           >
-            INTEGRAL.
+            SGSST.
           </motion.h1>
         </div>
 
