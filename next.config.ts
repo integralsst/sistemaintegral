@@ -4,12 +4,12 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
       },
     ],
   },
-  /* Aquí puedes mantener o agregar otras configuraciones como reactStrictMode si lo requieres */
 };
 
 export default nextConfig;
