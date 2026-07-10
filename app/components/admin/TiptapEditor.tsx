@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
+import {
+  useEditor,
+  EditorContent,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Image as TiptapImage } from "@tiptap/extension-image";
 import { Table } from "@tiptap/extension-table";
@@ -42,39 +47,7 @@ interface TiptapEditorProps {
   onChange: (value: string) => void;
 }
 
-const CustomImage = TiptapImage.extend({
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-
-      width: {
-        default: null,
-        parseHTML: (element) =>
-          element.getAttribute("data-width") ||
-          element.style.width ||
-          element.getAttribute("width"),
-        renderHTML: (attributes) => {
-          if (!attributes.width) return {};
-
-          return {
-            "data-width": attributes.width,
-            style: `width: ${attributes.width};`,
-          };
-        },
-      },
-
-      dataAlign: {
-        default: "center",
-        parseHTML: (element) => element.getAttribute("data-align") || "center",
-        renderHTML: (attributes) => {
-          return {
-            "data-align": attributes.dataAlign || "center",
-          };
-        },
-      },
-    };
-  },
-});
+type ImageAlign = "left" | "center" | "right" | "left-wrap" | "right-wrap";
 
 function escapeHtml(value: string) {
   return value
@@ -83,6 +56,10 @@ function escapeHtml(value: string) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function escapeAttribute(value: string) {
+  return escapeHtml(value).replace(/`/g, "&#096;");
 }
 
 function isTabularText(text: string) {
@@ -151,6 +128,232 @@ function insertHtmlIntoEditor(view: any, html: string) {
   return true;
 }
 
+function getImageWrapperStyle(width: string, align: ImageAlign) {
+  const base: React.CSSProperties = {
+    width: width || "100%",
+    maxWidth: "100%",
+    position: "relative",
+  };
+
+  if (align === "left") {
+    return {
+      ...base,
+      display: "block",
+      margin: "1.5rem auto 1.5rem 0",
+      float: "none",
+      clear: "both",
+    };
+  }
+
+  if (align === "center") {
+    return {
+      ...base,
+      display: "block",
+      margin: "1.5rem auto",
+      float: "none",
+      clear: "both",
+    };
+  }
+
+  if (align === "right") {
+    return {
+      ...base,
+      display: "block",
+      margin: "1.5rem 0 1.5rem auto",
+      float: "none",
+      clear: "both",
+    };
+  }
+
+  if (align === "left-wrap") {
+    return {
+      ...base,
+      float: "left" as const,
+      margin: "0.5rem 1.5rem 1rem 0",
+      clear: "none",
+    };
+  }
+
+  if (align === "right-wrap") {
+    return {
+      ...base,
+      float: "right" as const,
+      margin: "0.5rem 0 1rem 1.5rem",
+      clear: "none",
+    };
+  }
+
+  return base;
+}
+
+const ResizableImageView = (props: any) => {
+  const { node, updateAttributes, selected, editor, getPos } = props;
+
+  const src = node.attrs.src;
+  const alt = node.attrs.alt || "";
+  const title = node.attrs.title || "";
+  const width = node.attrs.width || "100%";
+  const align = (node.attrs.dataAlign || "center") as ImageAlign;
+
+  const selectImage = (event: React.MouseEvent) => {
+    event.preventDefault();
+
+    if (typeof getPos === "function") {
+      const pos = getPos();
+      editor.commands.setNodeSelection(pos);
+    }
+  };
+
+  const setWidth = (nextWidth: string) => {
+    updateAttributes({
+      width: nextWidth,
+    });
+  };
+
+  const setAlign = (nextAlign: ImageAlign) => {
+    updateAttributes({
+      dataAlign: nextAlign,
+    });
+  };
+
+  const startResize = (event: React.PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const wrapper = event.currentTarget.parentElement as HTMLElement | null;
+    const editorElement = wrapper?.closest(".ProseMirror") as HTMLElement | null;
+
+    if (!wrapper || !editorElement) return;
+
+    const startX = event.clientX;
+    const startWidth = wrapper.getBoundingClientRect().width;
+    const maxWidth = editorElement.getBoundingClientRect().width;
+
+    const onMove = (moveEvent: PointerEvent) => {
+      const delta = moveEvent.clientX - startX;
+      const nextPx = Math.max(80, Math.min(startWidth + delta, maxWidth));
+      const nextPercent = Math.round((nextPx / maxWidth) * 100);
+
+      updateAttributes({
+        width: `${Math.max(15, Math.min(nextPercent, 100))}%`,
+      });
+    };
+
+    const onUp = () => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+    };
+
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerup", onUp);
+  };
+
+  return (
+    <NodeViewWrapper
+      as="div"
+      className={`sis-image-node ${selected ? "is-selected" : ""}`}
+      data-align={align}
+      data-width={width}
+      style={getImageWrapperStyle(width, align)}
+      contentEditable={false}
+      onClick={selectImage}
+    >
+      {selected && (
+        <div
+          className="sis-image-floating-toolbar"
+          contentEditable={false}
+          onMouseDown={(event) => event.preventDefault()}
+        >
+          <button type="button" onClick={() => setWidth("25%")}>
+            25%
+          </button>
+          <button type="button" onClick={() => setWidth("40%")}>
+            40%
+          </button>
+          <button type="button" onClick={() => setWidth("50%")}>
+            50%
+          </button>
+          <button type="button" onClick={() => setWidth("75%")}>
+            75%
+          </button>
+          <button type="button" onClick={() => setWidth("100%")}>
+            100%
+          </button>
+
+          <span />
+
+          <button type="button" onClick={() => setAlign("left")}>
+            Izq
+          </button>
+          <button type="button" onClick={() => setAlign("center")}>
+            Centro
+          </button>
+          <button type="button" onClick={() => setAlign("right")}>
+            Der
+          </button>
+          <button type="button" onClick={() => setAlign("left-wrap")}>
+            Texto der
+          </button>
+          <button type="button" onClick={() => setAlign("right-wrap")}>
+            Texto izq
+          </button>
+        </div>
+      )}
+
+      <img src={src} alt={alt} title={title} draggable={false} />
+
+      {selected && (
+        <div
+          className="sis-image-resize-handle"
+          contentEditable={false}
+          onPointerDown={startResize}
+          title="Arrastra para redimensionar"
+        />
+      )}
+    </NodeViewWrapper>
+  );
+};
+
+const CustomImage = TiptapImage.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+
+      width: {
+        default: "100%",
+        parseHTML: (element) =>
+          element.getAttribute("data-width") ||
+          element.style.width ||
+          element.getAttribute("width") ||
+          "100%",
+        renderHTML: (attributes) => {
+          const width = attributes.width || "100%";
+
+          return {
+            "data-width": width,
+            style: `width: ${width};`,
+          };
+        },
+      },
+
+      dataAlign: {
+        default: "center",
+        parseHTML: (element) =>
+          element.getAttribute("data-align") || "center",
+        renderHTML: (attributes) => {
+          return {
+            "data-align": attributes.dataAlign || "center",
+          };
+        },
+      },
+    };
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableImageView);
+  },
+});
+
 const MenuBar = ({
   editor,
   isFullscreen,
@@ -164,59 +367,75 @@ const MenuBar = ({
 
   if (!editor) return null;
 
+  const buttonBase = (isActive: boolean) =>
+    `p-2 rounded-lg transition-colors flex items-center justify-center ${
+      isActive
+        ? "bg-blue-100 text-blue-600"
+        : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+    }`;
+
+  const preventBlur = (event: React.MouseEvent) => {
+    event.preventDefault();
+  };
+
+  const insertImageFromUrl = (src: string) => {
+    const safeSrc = escapeAttribute(src);
+
+    editor
+      .chain()
+      .focus()
+      .insertContent(
+        `<img src="${safeSrc}" data-align="center" data-width="100%" style="width: 100%;" />`
+      )
+      .run();
+  };
+
   const handleImageUpload = () => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
 
     input.onchange = async () => {
-      if (input.files?.length) {
-        const file = input.files[0];
+      if (!input.files?.length) return;
 
-        setIsUploading(true);
+      const file = input.files[0];
+      setIsUploading(true);
 
-        const data = new FormData();
-        data.append("file", file);
-        data.append(
-          "upload_preset",
-          process.env.NEXT_PUBLIC_CLOUDINARY_PRESET || ""
-        );
-        data.append(
-          "cloud_name",
-          process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || ""
-        );
+      const data = new FormData();
+      data.append("file", file);
+      data.append(
+        "upload_preset",
+        process.env.NEXT_PUBLIC_CLOUDINARY_PRESET || ""
+      );
+      data.append(
+        "cloud_name",
+        process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || ""
+      );
 
-        try {
-          const res = await fetch(
-            `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-            {
-              method: "POST",
-              body: data,
-            }
-          );
-
-          const uploadedFile = await res.json();
-
-          if (uploadedFile.secure_url) {
-            editor
-              .chain()
-              .focus()
-              .setImage({
-                src: uploadedFile.secure_url,
-                dataAlign: "center",
-                width: "100%",
-              })
-              .run();
+      try {
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+          {
+            method: "POST",
+            body: data,
           }
-        } catch (error) {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "No se pudo subir la imagen.",
-          });
-        } finally {
-          setIsUploading(false);
+        );
+
+        const uploadedFile = await res.json();
+
+        if (uploadedFile.secure_url) {
+          insertImageFromUrl(uploadedFile.secure_url);
+        } else {
+          throw new Error("No secure_url returned");
         }
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo subir la imagen.",
+        });
+      } finally {
+        setIsUploading(false);
       }
     };
 
@@ -235,9 +454,7 @@ const MenuBar = ({
       .run();
   };
 
-  const setImageAlign = (
-    align: "left" | "center" | "right" | "left-wrap" | "right-wrap"
-  ) => {
+  const setImageAlign = (align: ImageAlign) => {
     editor.chain().focus().updateAttributes("image", { dataAlign: align }).run();
   };
 
@@ -245,19 +462,13 @@ const MenuBar = ({
     editor.chain().focus().updateAttributes("image", { width }).run();
   };
 
-  const btnClass = (isActive: boolean) =>
-    `p-2 rounded-lg transition-colors flex items-center justify-center ${
-      isActive
-        ? "bg-blue-100 text-blue-600"
-        : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-    }`;
-
   return (
     <div className="sticky top-0 z-50 flex flex-wrap gap-1 p-2 bg-white/95 backdrop-blur-xl border-b border-gray-200 rounded-t-2xl">
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={btnClass(editor.isActive("bold"))}
+        className={buttonBase(editor.isActive("bold"))}
         title="Negrita"
       >
         <Bold size={18} />
@@ -265,8 +476,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={btnClass(editor.isActive("italic"))}
+        className={buttonBase(editor.isActive("italic"))}
         title="Cursiva"
       >
         <Italic size={18} />
@@ -274,8 +486,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={btnClass(editor.isActive("strike"))}
+        className={buttonBase(editor.isActive("strike"))}
         title="Tachado"
       >
         <Strikethrough size={18} />
@@ -285,15 +498,14 @@ const MenuBar = ({
 
       <select
         defaultValue=""
-        onChange={(e) => {
-          const value = e.target.value;
+        onChange={(event) => {
+          const value = event.target.value;
 
           if (!value) {
             editor.chain().focus().unsetFontSize().run();
-            return;
+          } else {
+            editor.chain().focus().setFontSize(value).run();
           }
-
-          editor.chain().focus().setFontSize(value).run();
         }}
         className="h-9 rounded-lg border border-gray-200 bg-white px-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         title="Tamaño de letra"
@@ -311,8 +523,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={btnClass(editor.isActive("heading", { level: 2 }))}
+        className={buttonBase(editor.isActive("heading", { level: 2 }))}
         title="Título H2"
       >
         <Heading2 size={18} />
@@ -320,8 +533,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        className={btnClass(editor.isActive("heading", { level: 3 }))}
+        className={buttonBase(editor.isActive("heading", { level: 3 }))}
         title="Título H3"
       >
         <Heading3 size={18} />
@@ -331,8 +545,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().setTextAlign("left").run()}
-        className={btnClass(editor.isActive({ textAlign: "left" }))}
+        className={buttonBase(editor.isActive({ textAlign: "left" }))}
         title="Alinear texto izquierda"
       >
         <AlignLeft size={18} />
@@ -340,8 +555,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().setTextAlign("center").run()}
-        className={btnClass(editor.isActive({ textAlign: "center" }))}
+        className={buttonBase(editor.isActive({ textAlign: "center" }))}
         title="Centrar texto"
       >
         <AlignCenter size={18} />
@@ -349,8 +565,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().setTextAlign("right").run()}
-        className={btnClass(editor.isActive({ textAlign: "right" }))}
+        className={buttonBase(editor.isActive({ textAlign: "right" }))}
         title="Alinear texto derecha"
       >
         <AlignRight size={18} />
@@ -358,8 +575,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-        className={btnClass(editor.isActive({ textAlign: "justify" }))}
+        className={buttonBase(editor.isActive({ textAlign: "justify" }))}
         title="Justificar texto"
       >
         <AlignJustify size={18} />
@@ -369,8 +587,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={btnClass(editor.isActive("bulletList"))}
+        className={buttonBase(editor.isActive("bulletList"))}
         title="Lista"
       >
         <List size={18} />
@@ -378,8 +597,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={btnClass(editor.isActive("orderedList"))}
+        className={buttonBase(editor.isActive("orderedList"))}
         title="Lista numerada"
       >
         <ListOrdered size={18} />
@@ -387,8 +607,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={btnClass(editor.isActive("blockquote"))}
+        className={buttonBase(editor.isActive("blockquote"))}
         title="Cita"
       >
         <Quote size={18} />
@@ -398,9 +619,10 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={handleImageUpload}
         disabled={isUploading}
-        className={btnClass(false)}
+        className={buttonBase(false)}
         title="Subir imagen"
       >
         {isUploading ? (
@@ -412,8 +634,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={insertTable}
-        className={btnClass(editor.isActive("table"))}
+        className={buttonBase(editor.isActive("table"))}
         title="Insertar tabla"
       >
         <TableIcon size={18} />
@@ -421,8 +644,9 @@ const MenuBar = ({
 
       <button
         type="button"
+        onMouseDown={preventBlur}
         onClick={onToggleFullscreen}
-        className={btnClass(false)}
+        className={buttonBase(false)}
         title={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
       >
         {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
@@ -432,64 +656,93 @@ const MenuBar = ({
         <div className="flex flex-wrap gap-1 bg-purple-50 p-1 rounded-lg border border-purple-100 ml-2">
           <button
             type="button"
+            onMouseDown={preventBlur}
             onClick={() => setImageAlign("left")}
             className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
-            title="Imagen a la izquierda"
           >
             Img Izq
           </button>
 
           <button
             type="button"
+            onMouseDown={preventBlur}
             onClick={() => setImageAlign("center")}
             className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
-            title="Imagen centrada"
           >
             Img Centro
           </button>
 
           <button
             type="button"
+            onMouseDown={preventBlur}
             onClick={() => setImageAlign("right")}
             className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
-            title="Imagen a la derecha"
           >
             Img Der
           </button>
 
           <button
             type="button"
+            onMouseDown={preventBlur}
             onClick={() => setImageAlign("left-wrap")}
             className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
-            title="Texto rodeando imagen a la izquierda"
           >
-            Texto Der
+            Texto der
           </button>
 
           <button
             type="button"
+            onMouseDown={preventBlur}
             onClick={() => setImageAlign("right-wrap")}
             className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
-            title="Texto rodeando imagen a la derecha"
           >
-            Texto Izq
+            Texto izq
           </button>
 
-          <select
-            defaultValue=""
-            onChange={(e) => {
-              if (e.target.value) setImageWidth(e.target.value);
-            }}
-            className="h-8 rounded-md border border-purple-100 bg-white px-2 text-[11px] font-semibold text-purple-700"
-            title="Tamaño de imagen"
+          <button
+            type="button"
+            onMouseDown={preventBlur}
+            onClick={() => setImageWidth("25%")}
+            className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
           >
-            <option value="">Tamaño</option>
-            <option value="25%">25%</option>
-            <option value="40%">40%</option>
-            <option value="50%">50%</option>
-            <option value="75%">75%</option>
-            <option value="100%">100%</option>
-          </select>
+            25%
+          </button>
+
+          <button
+            type="button"
+            onMouseDown={preventBlur}
+            onClick={() => setImageWidth("40%")}
+            className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
+          >
+            40%
+          </button>
+
+          <button
+            type="button"
+            onMouseDown={preventBlur}
+            onClick={() => setImageWidth("50%")}
+            className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
+          >
+            50%
+          </button>
+
+          <button
+            type="button"
+            onMouseDown={preventBlur}
+            onClick={() => setImageWidth("75%")}
+            className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
+          >
+            75%
+          </button>
+
+          <button
+            type="button"
+            onMouseDown={preventBlur}
+            onClick={() => setImageWidth("100%")}
+            className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
+          >
+            100%
+          </button>
         </div>
       )}
 
@@ -497,6 +750,7 @@ const MenuBar = ({
         <div className="flex gap-1 bg-blue-50 p-1 rounded-lg border border-blue-100 ml-2">
           <button
             type="button"
+            onMouseDown={preventBlur}
             onClick={() => editor.chain().focus().addColumnBefore().run()}
             className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
             title="Agregar columna antes"
@@ -506,6 +760,7 @@ const MenuBar = ({
 
           <button
             type="button"
+            onMouseDown={preventBlur}
             onClick={() => editor.chain().focus().deleteColumn().run()}
             className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition-colors"
             title="Eliminar columna"
@@ -515,6 +770,7 @@ const MenuBar = ({
 
           <button
             type="button"
+            onMouseDown={preventBlur}
             onClick={() => editor.chain().focus().addRowAfter().run()}
             className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
             title="Agregar fila"
@@ -524,6 +780,7 @@ const MenuBar = ({
 
           <button
             type="button"
+            onMouseDown={preventBlur}
             onClick={() => editor.chain().focus().deleteRow().run()}
             className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition-colors"
             title="Eliminar fila"
@@ -533,6 +790,7 @@ const MenuBar = ({
 
           <button
             type="button"
+            onMouseDown={preventBlur}
             onClick={() => editor.chain().focus().deleteTable().run()}
             className="p-1.5 text-red-500 hover:bg-red-100 rounded-md transition-colors"
             title="Eliminar tabla"
@@ -556,13 +814,6 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
       CustomImage.configure({
         inline: false,
         allowBase64: false,
-        resize: {
-          enabled: true,
-          directions: ["bottom-right"],
-          minWidth: 80,
-          minHeight: 80,
-          alwaysPreserveAspectRatio: true,
-        },
       }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
@@ -589,18 +840,12 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
 
         if (html && /<table[\s>]/i.test(html)) {
           event.preventDefault();
-
-          const tableHtml = getFirstTableFromHtml(html);
-
-          return insertHtmlIntoEditor(view, tableHtml);
+          return insertHtmlIntoEditor(view, getFirstTableFromHtml(html));
         }
 
         if (text && isTabularText(text)) {
           event.preventDefault();
-
-          const tableHtml = textToTableHtml(text);
-
-          return insertHtmlIntoEditor(view, tableHtml);
+          return insertHtmlIntoEditor(view, textToTableHtml(text));
         }
 
         return false;
@@ -709,55 +954,82 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
           margin-bottom: 0.75rem;
         }
 
-        .tiptap-content p.is-editor-empty:first-child::before {
-          content: attr(data-placeholder);
-          float: left;
-          color: #adb5bd;
-          pointer-events: none;
-          height: 0;
+        .sis-image-node {
+          box-sizing: border-box;
+          max-width: 100%;
+          position: relative;
         }
 
-        .tiptap-content img {
+        .sis-image-node img {
+          width: 100%;
           max-width: 100%;
           height: auto;
           border-radius: 14px;
-          margin: 1.5rem auto;
           display: block;
           border: 1px solid #f0f0f0;
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
           cursor: pointer;
+          user-select: none;
         }
 
-        .tiptap-content img.ProseMirror-selectednode {
+        .sis-image-node.is-selected img {
           outline: 3px solid #007aff;
           outline-offset: 4px;
         }
 
-        .tiptap-content img[data-align="left"] {
-          margin-left: 0;
-          margin-right: auto;
+        .sis-image-floating-toolbar {
+          position: absolute;
+          left: 50%;
+          top: -46px;
+          transform: translateX(-50%);
+          z-index: 40;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          background: rgba(255, 255, 255, 0.96);
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          padding: 6px;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+          white-space: nowrap;
         }
 
-        .tiptap-content img[data-align="center"] {
-          margin-left: auto;
-          margin-right: auto;
+        .sis-image-floating-toolbar button {
+          font-size: 11px;
+          font-weight: 700;
+          color: #374151;
+          background: #f9fafb;
+          border: 1px solid #e5e7eb;
+          padding: 4px 7px;
+          border-radius: 8px;
+          transition: all 0.15s ease;
         }
 
-        .tiptap-content img[data-align="right"] {
-          margin-left: auto;
-          margin-right: 0;
+        .sis-image-floating-toolbar button:hover {
+          background: #eef2ff;
+          color: #2563eb;
+          border-color: #bfdbfe;
         }
 
-        .tiptap-content img[data-align="left-wrap"] {
-          float: left;
-          width: 40%;
-          margin: 0.5rem 1.5rem 1rem 0;
+        .sis-image-floating-toolbar span {
+          width: 1px;
+          height: 20px;
+          background: #e5e7eb;
+          margin: 0 2px;
         }
 
-        .tiptap-content img[data-align="right-wrap"] {
-          float: right;
-          width: 40%;
-          margin: 0.5rem 0 1rem 1.5rem;
+        .sis-image-resize-handle {
+          position: absolute;
+          right: -9px;
+          bottom: -9px;
+          width: 18px;
+          height: 18px;
+          border-radius: 999px;
+          background: #007aff;
+          border: 3px solid white;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+          cursor: nwse-resize;
+          z-index: 30;
         }
 
         .tiptap-content table {
@@ -820,11 +1092,20 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
             line-height: 1.65;
           }
 
-          .tiptap-content img[data-align="left-wrap"],
-          .tiptap-content img[data-align="right-wrap"] {
-            float: none;
+          .sis-image-node[data-align="left-wrap"],
+          .sis-image-node[data-align="right-wrap"] {
+            float: none !important;
             width: 100% !important;
-            margin: 1.5rem auto;
+            margin: 1.5rem auto !important;
+          }
+
+          .sis-image-floating-toolbar {
+            position: static;
+            transform: none;
+            margin-bottom: 0.75rem;
+            overflow-x: auto;
+            max-width: 100%;
+            justify-content: flex-start;
           }
         }
       `}</style>

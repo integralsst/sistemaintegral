@@ -423,13 +423,11 @@ export default async function PostDetailPage({
 
 .safe-content img[data-align="left-wrap"] {
   float: left;
-  width: 40%;
   margin: 0.5rem 1.5rem 1rem 0;
 }
 
 .safe-content img[data-align="right-wrap"] {
   float: right;
-  width: 40%;
   margin: 0.5rem 0 1rem 1.5rem;
 }
 
