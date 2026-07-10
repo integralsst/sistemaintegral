@@ -16,6 +16,7 @@ import { TableHeader } from "@tiptap/extension-table-header";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { TextStyle, FontSize } from "@tiptap/extension-text-style";
 import { DOMParser as ProseMirrorDOMParser } from "@tiptap/pm/model";
+import { TextSelection } from "@tiptap/pm/state";
 
 import {
   Bold,
@@ -128,6 +129,87 @@ function insertHtmlIntoEditor(view: any, html: string) {
   return true;
 }
 
+function isWrapAlign(align: ImageAlign) {
+  return align === "left-wrap" || align === "right-wrap";
+}
+
+function getSafeWrapWidth(width: string | null | undefined) {
+  if (!width || width === "100%" || width === "auto") {
+    return "40%";
+  }
+
+  return width;
+}
+
+function ensureParagraphAfterSelectedImage(editor: any) {
+  editor.commands.command(({ state, dispatch }: any) => {
+    const { selection, schema } = state;
+    const paragraph = schema.nodes.paragraph;
+
+    if (!paragraph) return false;
+
+    const posAfterImage = selection.to;
+    const $posAfterImage = state.doc.resolve(posAfterImage);
+
+    let tr = state.tr;
+    let cursorPos = posAfterImage + 1;
+
+    if ($posAfterImage.nodeAfter?.type.name !== "paragraph") {
+      tr = tr.insert(posAfterImage, paragraph.create());
+      cursorPos = posAfterImage + 1;
+    }
+
+    tr = tr
+      .setSelection(TextSelection.create(tr.doc, cursorPos))
+      .scrollIntoView();
+
+    if (dispatch) dispatch(tr);
+
+    return true;
+  });
+
+  setTimeout(() => {
+    editor.commands.focus();
+  }, 0);
+}
+
+function ensureParagraphAfterImageNode(editor: any, getPos: any, nodeSize: number) {
+  editor.commands.command(({ state, dispatch }: any) => {
+    if (typeof getPos !== "function") return false;
+
+    const imagePos = getPos();
+
+    if (typeof imagePos !== "number") return false;
+
+    const paragraph = state.schema.nodes.paragraph;
+
+    if (!paragraph) return false;
+
+    const posAfterImage = imagePos + nodeSize;
+    const $posAfterImage = state.doc.resolve(posAfterImage);
+
+    let tr = state.tr;
+    let cursorPos = posAfterImage + 1;
+
+    if ($posAfterImage.nodeAfter?.type.name !== "paragraph") {
+      tr = tr.insert(posAfterImage, paragraph.create());
+      cursorPos = posAfterImage + 1;
+    }
+
+    tr = tr
+      .setSelection(TextSelection.create(tr.doc, cursorPos))
+      .scrollIntoView();
+
+    if (dispatch) dispatch(tr);
+
+    return true;
+  });
+
+  setTimeout(() => {
+    editor.commands.focus();
+  }, 0);
+}
+
 function getImageWrapperStyle(width: string, align: ImageAlign) {
   const base: React.CSSProperties = {
     width: width || "100%",
@@ -211,10 +293,19 @@ const ResizableImageView = (props: any) => {
   };
 
   const setAlign = (nextAlign: ImageAlign) => {
-    updateAttributes({
-      dataAlign: nextAlign,
+  const nextWidth = isWrapAlign(nextAlign) ? getSafeWrapWidth(width) : width;
+
+  updateAttributes({
+    dataAlign: nextAlign,
+    width: nextWidth,
+  });
+
+  if (isWrapAlign(nextAlign)) {
+    requestAnimationFrame(() => {
+      ensureParagraphAfterImageNode(editor, getPos, node.nodeSize);
     });
-  };
+  }
+};
 
   const startResize = (event: React.PointerEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -455,8 +546,26 @@ const MenuBar = ({
   };
 
   const setImageAlign = (align: ImageAlign) => {
-    editor.chain().focus().updateAttributes("image", { dataAlign: align }).run();
-  };
+  const currentImageAttrs = editor.getAttributes("image");
+  const nextWidth = isWrapAlign(align)
+    ? getSafeWrapWidth(currentImageAttrs.width)
+    : currentImageAttrs.width;
+
+  editor
+    .chain()
+    .focus()
+    .updateAttributes("image", {
+      dataAlign: align,
+      width: nextWidth || "100%",
+    })
+    .run();
+
+  if (isWrapAlign(align)) {
+    requestAnimationFrame(() => {
+      ensureParagraphAfterSelectedImage(editor);
+    });
+  }
+};
 
   const setImageWidth = (width: string) => {
     editor.chain().focus().updateAttributes("image", { width }).run();
