@@ -68,15 +68,25 @@ function sanitizePostContent(content: string) {
       "tr",
       "th",
       "td",
+      "colgroup",
+      "col",
       "br",
       "div",
       "span",
-      "colgroup",
-"col",
     ],
     allowedAttributes: {
       a: ["href", "target", "rel", "class", "style"],
-      img: ["src", "alt", "title", "width", "height", "class", "style"],
+      img: [
+        "src",
+        "alt",
+        "title",
+        "width",
+        "height",
+        "class",
+        "style",
+        "data-align",
+        "data-width",
+      ],
       div: ["class", "style", "data-align"],
       span: ["class", "style", "data-align"],
       p: ["class", "style", "data-align"],
@@ -95,7 +105,24 @@ function sanitizePostContent(content: string) {
       li: ["class", "style"],
       blockquote: ["class", "style"],
       colgroup: ["class", "style"],
-col: ["class", "style", "span", "width"],
+      col: ["class", "style", "span", "width"],
+    },
+    allowedStyles: {
+      "*": {
+        "font-size": [
+          /^12px$/,
+          /^14px$/,
+          /^16px$/,
+          /^18px$/,
+          /^20px$/,
+          /^24px$/,
+          /^28px$/,
+          /^32px$/,
+        ],
+        "text-align": [/^left$/, /^center$/, /^right$/, /^justify$/],
+        width: [/^\d{1,3}%$/, /^\d{1,4}px$/],
+        height: [/^auto$/, /^\d{1,4}px$/],
+      },
     },
     allowedSchemes: ["http", "https", "mailto", "tel"],
   });
@@ -369,6 +396,51 @@ export default async function PostDetailPage({
         .tiptap-output [style*="text-align: justify"] {
           text-align: justify;
         }
+          .safe-content::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+.safe-content span[style*="font-size"] {
+  line-height: 1.6;
+}
+
+.safe-content img[data-align="left"] {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.safe-content img[data-align="center"] {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.safe-content img[data-align="right"] {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.safe-content img[data-align="left-wrap"] {
+  float: left;
+  width: 40%;
+  margin: 0.5rem 1.5rem 1rem 0;
+}
+
+.safe-content img[data-align="right-wrap"] {
+  float: right;
+  width: 40%;
+  margin: 0.5rem 0 1rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .safe-content img[data-align="left-wrap"],
+  .safe-content img[data-align="right-wrap"] {
+    float: none;
+    width: 100% !important;
+    margin: 1.5rem auto;
+  }
+}
       `}</style>
     </article>
   );

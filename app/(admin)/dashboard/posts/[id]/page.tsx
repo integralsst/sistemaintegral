@@ -181,11 +181,11 @@ export default function EditPostPage() {
                 </div>
             </div>
 
-            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] min-h-[600px] flex flex-col">
+            <div className="bg-white p-4 sm:p-6 md:p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] min-h-[760px] flex flex-col">
                 <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-6">Cuerpo del artículo</label>
-                <div className="flex-1 h-full">
-                    <TiptapEditor value={formData.content} onChange={handleEditorChange} />
-                </div>
+                <div className="flex-1 min-h-[680px] h-full">
+  <TiptapEditor value={formData.content} onChange={handleEditorChange} />
+</div>
             </div>
         </div>
 

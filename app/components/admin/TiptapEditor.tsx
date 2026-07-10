@@ -9,6 +9,7 @@ import { TableRow } from "@tiptap/extension-table-row";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { TextAlign } from "@tiptap/extension-text-align";
+import { TextStyle, FontSize } from "@tiptap/extension-text-style";
 import { DOMParser as ProseMirrorDOMParser } from "@tiptap/pm/model";
 
 import {
@@ -30,6 +31,8 @@ import {
   Trash2,
   Plus,
   Minus,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 
 import Swal from "sweetalert2";
@@ -38,6 +41,40 @@ interface TiptapEditorProps {
   value: string;
   onChange: (value: string) => void;
 }
+
+const CustomImage = TiptapImage.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+
+      width: {
+        default: null,
+        parseHTML: (element) =>
+          element.getAttribute("data-width") ||
+          element.style.width ||
+          element.getAttribute("width"),
+        renderHTML: (attributes) => {
+          if (!attributes.width) return {};
+
+          return {
+            "data-width": attributes.width,
+            style: `width: ${attributes.width};`,
+          };
+        },
+      },
+
+      dataAlign: {
+        default: "center",
+        parseHTML: (element) => element.getAttribute("data-align") || "center",
+        renderHTML: (attributes) => {
+          return {
+            "data-align": attributes.dataAlign || "center",
+          };
+        },
+      },
+    };
+  },
+});
 
 function escapeHtml(value: string) {
   return value
@@ -114,7 +151,15 @@ function insertHtmlIntoEditor(view: any, html: string) {
   return true;
 }
 
-const MenuBar = ({ editor }: { editor: any }) => {
+const MenuBar = ({
+  editor,
+  isFullscreen,
+  onToggleFullscreen,
+}: {
+  editor: any;
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
+}) => {
   const [isUploading, setIsUploading] = useState(false);
 
   if (!editor) return null;
@@ -158,6 +203,8 @@ const MenuBar = ({ editor }: { editor: any }) => {
               .focus()
               .setImage({
                 src: uploadedFile.secure_url,
+                dataAlign: "center",
+                width: "100%",
               })
               .run();
           }
@@ -188,6 +235,16 @@ const MenuBar = ({ editor }: { editor: any }) => {
       .run();
   };
 
+  const setImageAlign = (
+    align: "left" | "center" | "right" | "left-wrap" | "right-wrap"
+  ) => {
+    editor.chain().focus().updateAttributes("image", { dataAlign: align }).run();
+  };
+
+  const setImageWidth = (width: string) => {
+    editor.chain().focus().updateAttributes("image", { width }).run();
+  };
+
   const btnClass = (isActive: boolean) =>
     `p-2 rounded-lg transition-colors flex items-center justify-center ${
       isActive
@@ -196,7 +253,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
     }`;
 
   return (
-    <div className="flex flex-wrap gap-1 p-2 bg-gray-50 border-b border-gray-200 rounded-t-2xl">
+    <div className="sticky top-0 z-50 flex flex-wrap gap-1 p-2 bg-white/95 backdrop-blur-xl border-b border-gray-200 rounded-t-2xl">
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleBold().run()}
@@ -226,6 +283,32 @@ const MenuBar = ({ editor }: { editor: any }) => {
 
       <div className="w-px h-6 bg-gray-300 mx-2 self-center" />
 
+      <select
+        defaultValue=""
+        onChange={(e) => {
+          const value = e.target.value;
+
+          if (!value) {
+            editor.chain().focus().unsetFontSize().run();
+            return;
+          }
+
+          editor.chain().focus().setFontSize(value).run();
+        }}
+        className="h-9 rounded-lg border border-gray-200 bg-white px-2 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        title="Tamaño de letra"
+      >
+        <option value="">Letra</option>
+        <option value="14px">Pequeña</option>
+        <option value="16px">Normal</option>
+        <option value="18px">Media</option>
+        <option value="20px">Grande</option>
+        <option value="24px">Muy grande</option>
+        <option value="28px">Destacada</option>
+      </select>
+
+      <div className="w-px h-6 bg-gray-300 mx-2 self-center" />
+
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -250,7 +333,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
         type="button"
         onClick={() => editor.chain().focus().setTextAlign("left").run()}
         className={btnClass(editor.isActive({ textAlign: "left" }))}
-        title="Alinear izquierda"
+        title="Alinear texto izquierda"
       >
         <AlignLeft size={18} />
       </button>
@@ -259,7 +342,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
         type="button"
         onClick={() => editor.chain().focus().setTextAlign("center").run()}
         className={btnClass(editor.isActive({ textAlign: "center" }))}
-        title="Centrar"
+        title="Centrar texto"
       >
         <AlignCenter size={18} />
       </button>
@@ -268,7 +351,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
         type="button"
         onClick={() => editor.chain().focus().setTextAlign("right").run()}
         className={btnClass(editor.isActive({ textAlign: "right" }))}
-        title="Alinear derecha"
+        title="Alinear texto derecha"
       >
         <AlignRight size={18} />
       </button>
@@ -277,7 +360,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
         type="button"
         onClick={() => editor.chain().focus().setTextAlign("justify").run()}
         className={btnClass(editor.isActive({ textAlign: "justify" }))}
-        title="Justificar"
+        title="Justificar texto"
       >
         <AlignJustify size={18} />
       </button>
@@ -336,6 +419,80 @@ const MenuBar = ({ editor }: { editor: any }) => {
         <TableIcon size={18} />
       </button>
 
+      <button
+        type="button"
+        onClick={onToggleFullscreen}
+        className={btnClass(false)}
+        title={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+      >
+        {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+      </button>
+
+      {editor.isActive("image") && (
+        <div className="flex flex-wrap gap-1 bg-purple-50 p-1 rounded-lg border border-purple-100 ml-2">
+          <button
+            type="button"
+            onClick={() => setImageAlign("left")}
+            className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
+            title="Imagen a la izquierda"
+          >
+            Img Izq
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setImageAlign("center")}
+            className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
+            title="Imagen centrada"
+          >
+            Img Centro
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setImageAlign("right")}
+            className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
+            title="Imagen a la derecha"
+          >
+            Img Der
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setImageAlign("left-wrap")}
+            className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
+            title="Texto rodeando imagen a la izquierda"
+          >
+            Texto Der
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setImageAlign("right-wrap")}
+            className="px-2 py-1.5 text-[11px] font-semibold text-purple-700 hover:bg-purple-100 rounded-md"
+            title="Texto rodeando imagen a la derecha"
+          >
+            Texto Izq
+          </button>
+
+          <select
+            defaultValue=""
+            onChange={(e) => {
+              if (e.target.value) setImageWidth(e.target.value);
+            }}
+            className="h-8 rounded-md border border-purple-100 bg-white px-2 text-[11px] font-semibold text-purple-700"
+            title="Tamaño de imagen"
+          >
+            <option value="">Tamaño</option>
+            <option value="25%">25%</option>
+            <option value="40%">40%</option>
+            <option value="50%">50%</option>
+            <option value="75%">75%</option>
+            <option value="100%">100%</option>
+          </select>
+        </div>
+      )}
+
       {editor.isActive("table") && (
         <div className="flex gap-1 bg-blue-50 p-1 rounded-lg border border-blue-100 ml-2">
           <button
@@ -389,12 +546,23 @@ const MenuBar = ({ editor }: { editor: any }) => {
 };
 
 export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
-      TiptapImage.configure({
+      TextStyle,
+      FontSize,
+      CustomImage.configure({
         inline: false,
         allowBase64: false,
+        resize: {
+          enabled: true,
+          directions: ["bottom-right"],
+          minWidth: 80,
+          minHeight: 80,
+          alwaysPreserveAspectRatio: true,
+        },
       }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
@@ -419,7 +587,6 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
         const html = clipboardData.getData("text/html");
         const text = clipboardData.getData("text/plain");
 
-        // Google Docs normalmente pega tablas como HTML.
         if (html && /<table[\s>]/i.test(html)) {
           event.preventDefault();
 
@@ -428,7 +595,6 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
           return insertHtmlIntoEditor(view, tableHtml);
         }
 
-        // Google Sheets y Excel muchas veces pegan como texto tabulado.
         if (text && isTabularText(text)) {
           event.preventDefault();
 
@@ -438,6 +604,9 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
         }
 
         return false;
+      },
+      attributes: {
+        class: "sis-prosemirror",
       },
     },
     onUpdate: ({ editor }) => {
@@ -452,27 +621,92 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
     const nextHTML = value || "";
 
     if (nextHTML && nextHTML !== currentHTML) {
-     editor.commands.setContent(nextHTML, {
-  emitUpdate: false,
-});
+      editor.commands.setContent(nextHTML, {
+        emitUpdate: false,
+      });
     }
   }, [editor, value]);
 
-  return (
-    <div className="flex flex-col h-full border border-gray-100 rounded-2xl overflow-hidden focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
-      <MenuBar editor={editor} />
+  useEffect(() => {
+    if (!isFullscreen) return;
 
-      <div className="flex-1 overflow-y-auto p-6 bg-white prose max-w-none tiptap-content">
-        <EditorContent
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isFullscreen]);
+
+  return (
+    <div
+      className={
+        isFullscreen
+          ? "fixed inset-0 z-[9999] bg-[#F5F5F7] p-2 sm:p-4 md:p-6 flex flex-col"
+          : "flex flex-col h-full min-h-[620px] border border-gray-100 rounded-2xl overflow-hidden focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all"
+      }
+    >
+      <div
+        className={
+          isFullscreen
+            ? "flex flex-col h-full bg-white rounded-2xl border border-gray-200 shadow-2xl overflow-hidden"
+            : "flex flex-col h-full overflow-hidden"
+        }
+      >
+        <MenuBar
           editor={editor}
-          className="min-h-[400px] h-full outline-none"
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={() => setIsFullscreen((prev) => !prev)}
         />
+
+        <div
+          className={
+            isFullscreen
+              ? "flex-1 overflow-y-auto p-4 sm:p-8 md:p-12 bg-white prose max-w-none tiptap-content"
+              : "flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-white prose max-w-none tiptap-content"
+          }
+        >
+          <EditorContent
+            editor={editor}
+            className="min-h-[520px] h-full outline-none"
+          />
+        </div>
       </div>
 
       <style jsx global>{`
         .tiptap-content .ProseMirror {
           outline: none !important;
-          min-height: 400px;
+          min-height: 520px;
+          font-size: 18px;
+          line-height: 1.75;
+          color: #1d1d1f;
+          padding-bottom: 8rem;
+        }
+
+        .tiptap-content .ProseMirror::after {
+          content: "";
+          display: block;
+          clear: both;
+        }
+
+        .tiptap-content .ProseMirror p {
+          margin-bottom: 1rem;
+        }
+
+        .tiptap-content .ProseMirror h2 {
+          font-size: 1.75rem;
+          line-height: 1.25;
+          font-weight: 700;
+          margin-top: 2rem;
+          margin-bottom: 1rem;
+        }
+
+        .tiptap-content .ProseMirror h3 {
+          font-size: 1.35rem;
+          line-height: 1.3;
+          font-weight: 700;
+          margin-top: 1.5rem;
+          margin-bottom: 0.75rem;
         }
 
         .tiptap-content p.is-editor-empty:first-child::before {
@@ -486,10 +720,44 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
         .tiptap-content img {
           max-width: 100%;
           height: auto;
-          border-radius: 12px;
+          border-radius: 14px;
           margin: 1.5rem auto;
           display: block;
           border: 1px solid #f0f0f0;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+          cursor: pointer;
+        }
+
+        .tiptap-content img.ProseMirror-selectednode {
+          outline: 3px solid #007aff;
+          outline-offset: 4px;
+        }
+
+        .tiptap-content img[data-align="left"] {
+          margin-left: 0;
+          margin-right: auto;
+        }
+
+        .tiptap-content img[data-align="center"] {
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .tiptap-content img[data-align="right"] {
+          margin-left: auto;
+          margin-right: 0;
+        }
+
+        .tiptap-content img[data-align="left-wrap"] {
+          float: left;
+          width: 40%;
+          margin: 0.5rem 1.5rem 1rem 0;
+        }
+
+        .tiptap-content img[data-align="right-wrap"] {
+          float: right;
+          width: 40%;
+          margin: 0.5rem 0 1rem 1.5rem;
         }
 
         .tiptap-content table {
@@ -500,6 +768,7 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
           overflow: hidden;
           border-radius: 8px;
           box-shadow: 0 0 0 1px #e5e7eb;
+          font-size: 0.95rem;
         }
 
         .tiptap-content td,
@@ -543,6 +812,20 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
         .tiptap-content .resize-cursor {
           cursor: ew-resize;
           cursor: col-resize;
+        }
+
+        @media (max-width: 640px) {
+          .tiptap-content .ProseMirror {
+            font-size: 16px;
+            line-height: 1.65;
+          }
+
+          .tiptap-content img[data-align="left-wrap"],
+          .tiptap-content img[data-align="right-wrap"] {
+            float: none;
+            width: 100% !important;
+            margin: 1.5rem auto;
+          }
         }
       `}</style>
     </div>
