@@ -1108,6 +1108,27 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
             justify-content: flex-start;
           }
         }
+          .tiptap-content .ProseMirror ul {
+  list-style-type: disc !important;
+  padding-left: 1.75rem !important;
+  margin: 1rem 0 !important;
+}
+
+.tiptap-content .ProseMirror ol {
+  list-style-type: decimal !important;
+  padding-left: 1.75rem !important;
+  margin: 1rem 0 !important;
+}
+
+.tiptap-content .ProseMirror li {
+  display: list-item !important;
+  margin-bottom: 0.5rem !important;
+  padding-left: 0.25rem;
+}
+
+.tiptap-content .ProseMirror li p {
+  margin: 0 !important;
+}
       `}</style>
     </div>
   );

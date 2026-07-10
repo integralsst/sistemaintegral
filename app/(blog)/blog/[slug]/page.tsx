@@ -439,6 +439,27 @@ export default async function PostDetailPage({
     margin: 1.5rem auto;
   }
 }
+  .safe-content ul {
+  list-style-type: disc !important;
+  padding-left: 1.75rem !important;
+  margin: 1.25rem 0 !important;
+}
+
+.safe-content ol {
+  list-style-type: decimal !important;
+  padding-left: 1.75rem !important;
+  margin: 1.25rem 0 !important;
+}
+
+.safe-content li {
+  display: list-item !important;
+  margin-bottom: 0.5rem !important;
+  padding-left: 0.25rem;
+}
+
+.safe-content li p {
+  margin: 0 !important;
+}
       `}</style>
     </article>
   );
