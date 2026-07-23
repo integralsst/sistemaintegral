@@ -8,7 +8,7 @@ export default function CampaignsLayout({
   children,
 }: CampaignsLayoutProps) {
   return (
-    <main className="min-h-screen overflow-x-clip bg-[#030506] text-white">
+    <main className="min-h-screen overflow-x-clip bg-[#040608] text-white">
       {children}
     </main>
   );

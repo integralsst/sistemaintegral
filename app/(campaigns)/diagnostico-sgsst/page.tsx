@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
-
 import SgsstComplianceLanding from "./_components/SgsstComplianceLanding";
 
 export const metadata: Metadata = {
-  title: "Diagnóstico SG-SST para empresas | SIS",
+  title: "Multas y cierre por SG-SST | Diagnóstico gratuito SIS",
   description:
-    "Identifique brechas críticas del SG-SST, conozca la exposición de su empresa y reciba una ruta inicial de intervención.",
+    "Descubra en 60 segundos si su empresa tiene brechas críticas del SG-SST y conozca la prioridad de intervención.",
   robots: {
     index: false,
     follow: false,
   },
   openGraph: {
-    title: "¿Su empresa está preparada para una visita del Ministerio?",
+    title: "¿Su empresa podría demostrar hoy el cumplimiento del SG-SST?",
     description:
-      "Descubra en pocos minutos si existen brechas críticas en el SG-SST de su empresa.",
+      "Diagnóstico rápido para identificar señales de exposición antes de una visita, una denuncia o un accidente.",
     type: "website",
     locale: "es_CO",
     siteName: "SIS Riesgos Laborales",
@@ -22,7 +21,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Diagnóstico de exposición SG-SST | SIS",
     description:
-      "Evalúe rápidamente las principales señales de incumplimiento del SG-SST.",
+      "Cinco preguntas para detectar brechas críticas y definir el siguiente paso.",
   },
 };
 
