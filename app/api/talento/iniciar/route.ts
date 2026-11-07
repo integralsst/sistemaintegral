@@ -90,6 +90,14 @@ export async function POST(request: Request) {
       signature: signCloudinary(parameters, config.apiSecret),
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
+    if (error instanceof Error && error.message === "Cloudinary no está configurado correctamente") {
+      // No divulgar nombres de variables ni credenciales en respuestas públicas.
+      console.error("No se pudo iniciar postulación: falta configurar Cloudinary en el entorno.");
+      return NextResponse.json(
+        { error: "El servicio de recepción de hojas de vida no está disponible temporalmente." },
+        { status: 503, headers: { "Cache-Control": "no-store" } }
+      );
+    }
     console.error("No se pudo iniciar postulación:", error);
     return NextResponse.json(
       { error: "No pudimos iniciar tu postulación. Intenta nuevamente." },
