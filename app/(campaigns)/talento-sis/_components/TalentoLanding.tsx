@@ -140,13 +140,13 @@ export default function TalentoLanding() {
       };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#f5f5f7] text-[#1d1d1f] selection:bg-blue-200">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#f5f5f7] text-[#1d1d1f] selection:bg-blue-200 lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:overflow-hidden">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-[680px] bg-[radial-gradient(ellipse_at_18%_22%,rgba(36,100,255,0.09),transparent_46%),radial-gradient(ellipse_at_86%_12%,rgba(0,186,220,0.08),transparent_44%)]"
       />
 
-      <header className="relative z-20 px-4 pt-5 sm:px-8 sm:pt-7">
+      <header className="relative z-20 px-4 pt-5 sm:px-8 sm:pt-7 lg:shrink-0">
         <nav aria-label="Navegación de postulaciones" className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 rounded-full border border-black/[0.055] bg-white/95 px-5 py-3 shadow-[0_10px_40px_rgba(28,33,51,0.07)] backdrop-blur-2xl sm:px-7">
           <a href="/" aria-label="Ir a la página principal de SIS" className="inline-flex shrink-0 items-center">
             <Image src="/images/logo.png" alt="SIS" width={128} height={44} priority className="h-9 w-auto max-w-[128px] object-contain" />
@@ -160,14 +160,15 @@ export default function TalentoLanding() {
         </nav>
       </header>
 
-      <main>
-        <section className="relative mx-auto w-full max-w-[1300px] px-5 pb-20 pt-10 sm:px-8 sm:pb-28 sm:pt-14 lg:px-10 lg:pt-16">
-          <div className="grid min-w-0 grid-cols-1 items-start gap-y-8 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-x-12 lg:gap-y-10 xl:gap-x-16">
-            {/* En escritorio, la fotografía ocupa la columna izquierda.
-                En móviles, el titular aparece primero y la imagen conserva su tamaño natural. */}
+      <main className="lg:min-h-0 lg:flex-1">
+        <section className="relative mx-auto w-full max-w-[1300px] px-5 pb-20 pt-10 sm:px-8 sm:pb-28 sm:pt-14 lg:h-full lg:overflow-hidden lg:px-10 lg:pb-5 lg:pt-5">
+          <div className="grid min-w-0 grid-cols-1 items-start gap-y-8 lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:items-stretch lg:gap-x-12 lg:gap-y-0 xl:gap-x-16">
+            {/* Desktop: el panel derecho se desplaza independientemente de la imagen.
+                Móvil: display contents conserva título → imagen → formulario. */}
+            <div className="contents lg:order-2 lg:block lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:scroll-smooth lg:pb-8 lg:pr-2 lg:[scrollbar-width:thin] lg:[scrollbar-color:#c8cbd2_transparent]">
             <motion.div
               {...itemMotion}
-              className="min-w-0 lg:col-start-2 lg:row-start-1 lg:pt-4"
+              className="order-1 min-w-0 lg:pt-4"
             >
               <h1 className="max-w-2xl text-balance text-[clamp(2.5rem,4.4vw,4.8rem)] font-extrabold leading-[1.07] tracking-[-0.06em]">
                 Tu experiencia puede
@@ -187,21 +188,7 @@ export default function TalentoLanding() {
               </a>
             </motion.div>
 
-            <motion.figure
-              {...itemMotion}
-              className="min-w-0 overflow-hidden rounded-[1.7rem] border border-black/[0.045] bg-white shadow-[0_22px_65px_-25px_rgba(28,33,51,0.15)] sm:rounded-[2.2rem] lg:col-start-1 lg:row-start-1 lg:row-span-2"
-            >
-              <Image
-                src={gestionDocumentalImage}
-                alt="Profesional de SIS en su espacio de trabajo"
-                priority
-                placeholder="blur"
-                sizes="(max-width: 1023px) 100vw, (max-width: 1280px) 42vw, 510px"
-                className="block h-auto w-full object-contain"
-              />
-            </motion.figure>
-
-            <div id="postulacion" className="min-w-0 scroll-mt-6 lg:col-start-2 lg:row-start-2">
+            <div id="postulacion" className="order-3 min-w-0 scroll-mt-6 lg:mt-9">
             <motion.div
               {...itemMotion}
               className="min-w-0 rounded-[1.8rem] border border-black/[0.045] bg-white p-5 text-[#1d1d1f] shadow-[0_22px_65px_rgba(28,33,51,0.065)] sm:rounded-[2.25rem] sm:p-8 xl:p-10"
@@ -357,11 +344,34 @@ export default function TalentoLanding() {
               )}
             </motion.div>
             </div>
+              <div className="hidden lg:block lg:pt-8">
+                <p className="border-t border-[#e0e1e4] pt-6 text-xs leading-6 text-[#777984]">
+                  SIS · Sistema Integral en Riesgos Laborales
+                  <span className="block">
+                    <a href="mailto:contacto@sisriesgos.com" className="transition-colors hover:text-[#285bff]">contacto@sisriesgos.com</a>
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <motion.figure
+              {...itemMotion}
+              className="order-2 min-w-0 overflow-hidden rounded-[1.7rem] border border-black/[0.045] bg-white shadow-[0_22px_65px_-25px_rgba(28,33,51,0.15)] sm:rounded-[2.2rem] lg:order-1 lg:flex lg:h-full lg:min-h-0 lg:items-center lg:justify-center"
+            >
+              <Image
+                src={gestionDocumentalImage}
+                alt="Profesional de SIS en su espacio de trabajo"
+                priority
+                placeholder="blur"
+                sizes="(max-width: 1023px) 100vw, (max-width: 1280px) 42vw, 510px"
+                className="block h-auto w-full object-contain lg:max-h-full lg:max-w-full lg:w-auto"
+              />
+            </motion.figure>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-[#e5e5e7] px-5 py-7 sm:px-8">
+      <footer className="border-t border-[#e5e5e7] px-5 py-7 sm:px-8 lg:hidden">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 text-center text-xs text-[#777984] sm:flex-row sm:text-left">
           <p>SIS · Sistema Integral en Riesgos Laborales</p>
           <a href="mailto:contacto@sisriesgos.com" className="transition-colors hover:text-[#285bff]">
