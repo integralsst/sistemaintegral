@@ -59,6 +59,9 @@ export async function POST(request: Request) {
 
     const application = await prisma.postulacionTalento.create({
       data: {
+        // El mismo UUID identifica la fila y el PDF: evita la discrepancia
+        // con @default(cuid()) durante la confirmación.
+        id,
         nombreCompleto: data.fullName,
         correo: data.email,
         telefono: data.phone,
