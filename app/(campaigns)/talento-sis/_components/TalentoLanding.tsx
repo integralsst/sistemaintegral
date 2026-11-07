@@ -76,7 +76,6 @@ export default function TalentoLanding() {
           city: toString(form.get("city")),
           profession: toString(form.get("profession")),
           experienceYears: toString(form.get("experienceYears")),
-          availability: toString(form.get("availability")),
           message: toString(form.get("message")),
           cvFileName: file.name,
           consent: consentChecked && form.get("consent") === "on",
@@ -255,15 +254,6 @@ export default function TalentoLanding() {
                     <label className={labelStyle}>
                       Años de experiencia *
                       <input name="experienceYears" type="number" required min={0} max={60} step={1} defaultValue="0" className={inputStyle} disabled={busy} />
-                    </label>
-                    <label className={labelStyle + " sm:col-span-2"}>
-                      Modalidad de interés *
-                      <select name="availability" required defaultValue="" className={inputStyle} disabled={busy}>
-                        <option value="" disabled>Selecciona una opción</option>
-                        <option value="PRESENCIAL">Presencial</option>
-                        <option value="VIRTUAL">Virtual / remota</option>
-                        <option value="MIXTA">Mixta / ambas</option>
-                      </select>
                     </label>
                   </div>
 

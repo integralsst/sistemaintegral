@@ -68,7 +68,9 @@ export async function POST(request: Request) {
         ciudad: data.city,
         profesion: data.profession,
         aniosExperiencia: data.experienceYears,
-        modalidad: data.availability,
+        // Campo obligatorio heredado: valor técnico transitorio; no representa
+        // una preferencia del candidato. El formulario ya no solicita modalidad.
+        modalidad: "MIXTA",
         mensaje: data.message,
         hojaVidaNombre: data.cvFileName,
         hojaVidaPublicId: publicId,

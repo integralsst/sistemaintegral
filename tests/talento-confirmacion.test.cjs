@@ -121,6 +121,8 @@ test('inicio persiste UUID y lo reutiliza como identificador del PDF', async () 
   const body = await response.json();
   assert.match(body.applicationId, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
   assert.equal(created.id, body.applicationId);
+  // La modalidad no la elige el candidato; se mantiene un valor interno por compatibilidad con MySQL.
+  assert.equal(created.modalidad, 'MIXTA');
   assert.equal(created.hojaVidaPublicId, `talento-sis/${body.applicationId}.pdf`);
   assert.equal(created.tokenHash, hashToken(TOKEN));
   assert.equal(body.confirmationToken, TOKEN);
