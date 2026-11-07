@@ -9,7 +9,7 @@ type Candidate = {
   profesion: string; estado: Status; creadoEn: string;
 };
 type Detail = Candidate & {
-  telefono: string; aniosExperiencia: number; modalidad: string; mensaje: string | null;
+  telefono: string; aniosExperiencia: number; mensaje: string | null;
   hojaVidaNombre: string; utmSource: string | null; utmMedium: string | null;
   utmCampaign: string | null; utmContent: string | null;
 };
@@ -150,7 +150,6 @@ function CandidateDetail({ id, close, updated }: { id: string; close: () => void
             ["Correo electrónico", <a key="email" className="text-blue-600" href={`mailto:${item.correo}`}>{item.correo}</a>],
             ["Teléfono / WhatsApp", <a key="phone" className="text-blue-600" href={`https://wa.me/${(() => { const digits = item.telefono.replace(/\D/g, ""); return digits.length === 10 ? `57${digits}` : digits; })()}`} target="_blank" rel="noopener noreferrer">{item.telefono}</a>],
             ["Ciudad", item.ciudad], ["Experiencia", `${item.aniosExperiencia} años`],
-            ["Modalidad de interés", { PRESENCIAL: "Presencial", VIRTUAL: "Virtual / remota", MIXTA: "Mixta / ambas" }[item.modalidad]],
             ["Fecha de postulación", date(item.creadoEn)],
           ] as [string, ReactNode][]).map(([label, value]) => <div key={label} className="min-w-0"><dt className="text-xs text-gray-500">{label}</dt><dd className="mt-1 break-words font-medium">{value}</dd></div>)}
         </dl>
