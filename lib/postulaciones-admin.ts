@@ -64,7 +64,7 @@ export const summarySelect = {
 } satisfies Prisma.PostulacionTalentoSelect;
 
 export const detailSelect = {
-  ...summarySelect, telefono: true, aniosExperiencia: true, modalidad: true,
+  ...summarySelect, telefono: true, aniosExperiencia: true,
   mensaje: true, hojaVidaNombre: true, utmSource: true, utmMedium: true,
   utmCampaign: true, utmContent: true,
 } satisfies Prisma.PostulacionTalentoSelect;
