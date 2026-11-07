@@ -19,7 +19,11 @@ export async function POST(request: Request) {
     const id = typeof record.applicationId === "string" ? record.applicationId : "";
     const token = typeof record.confirmationToken === "string" ? record.confirmationToken : "";
 
-    if (!/^[0-9a-f-]{36}$/.test(id) || !/^[0-9a-f]{64}$/.test(token)) {
+    // Admitimos UUID nuevos y CUID de intentos creados antes de la corrección.
+    // El token secreto sigue siendo obligatorio y se comprueba contra su hash.
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    const isCuid = /^c[a-z0-9]{24}$/.test(id);
+    if ((!isUuid && !isCuid) || !/^[0-9a-f]{64}$/.test(token)) {
       return NextResponse.json({ error: "Solicitud inválida." }, { status: 400 });
     }
 
