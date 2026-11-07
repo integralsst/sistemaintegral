@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import gestionDocumentalImage from "@/public/images/gestion-documental.webp";
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { ArrowRight, CheckCircle2, LoaderCircle, LockKeyhole, UploadCloud, X } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -160,59 +161,50 @@ export default function TalentoLanding() {
       </header>
 
       <main>
-        <section className="relative mx-auto w-full max-w-[1320px] px-5 pb-18 pt-16 text-center sm:px-8 sm:pb-22 sm:pt-22 lg:pt-26">
-          <motion.div {...itemMotion} className="mx-auto max-w-5xl">
-            <h1 className="mx-auto max-w-5xl text-balance text-[clamp(2.6rem,6.3vw,5.8rem)] font-extrabold leading-[1.06] tracking-[-0.065em]">
-              Tu experiencia puede
-              <span className="block bg-gradient-to-r from-[#285bff] via-[#3475f4] to-[#00b4de] bg-clip-text text-transparent">
-                hacer la diferencia.
-              </span>
-            </h1>
-            <p className="mx-auto mt-7 max-w-2xl text-pretty text-base leading-7 text-[#777984] sm:text-lg sm:leading-8 lg:text-xl">
-              En SIS trabajamos por entornos laborales más seguros. Si quieres aportar tu experiencia a futuros proyectos de seguridad y salud en el trabajo, nos gustaría conocer tu perfil.
-            </p>
-            <a
-              href="#postulacion"
-              className="mt-9 inline-flex min-h-13 items-center justify-center gap-3 rounded-full bg-[#1d1d1f] px-8 py-3.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(29,29,31,0.13)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#244dce] hover:shadow-[0_16px_34px_rgba(36,77,206,0.19)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-500 sm:text-base"
-            >
-              Compartir mi hoja de vida <ArrowRight aria-hidden="true" className="size-5" />
-            </a>
-          </motion.div>
-
-          <motion.div
-            {...itemMotion}
-            className="relative mt-14 aspect-[1.12] w-full overflow-hidden rounded-[1.8rem] bg-[#dee3e9] shadow-[0_30px_75px_-30px_rgba(23,31,55,0.2)] sm:mt-18 sm:aspect-[1.8] sm:rounded-[2.5rem] lg:aspect-[2.25]"
-          >
-            <Image
-              src="/images/gestion-documental.webp"
-              alt="Profesional en un espacio de trabajo"
-              fill
-              priority
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 94vw, 1280px"
-              className="object-cover object-center"
-            />
-          </motion.div>
-        </section>
-
-        <section id="postulacion" className="relative scroll-mt-8 px-5 pb-22 pt-7 sm:px-8 sm:pb-28 lg:pt-15">
-          <div className="mx-auto grid w-full max-w-[1180px] gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start lg:gap-15">
-            <motion.div {...itemMotion} className="lg:sticky lg:top-16 lg:pt-13">
-              <h2 className="max-w-lg text-balance text-4xl font-extrabold leading-[1.1] tracking-[-0.055em] sm:text-5xl">
-                Queremos conocer tu experiencia.
-              </h2>
-              <p className="mt-6 max-w-md text-base leading-8 text-[#777984]">
-                Completa el formulario y adjunta tu hoja de vida en PDF. Nuestro equipo podrá revisar tu perfil cuando surjan oportunidades afines.
-              </p>
-              <div className="mt-9 max-w-md border-t border-[#dedfe3] pt-6">
-                <p className="text-sm leading-7 text-[#777984]">
-                  El registro es gratuito y no implica una oferta de empleo o contratación inmediata.
-                </p>
-              </div>
-            </motion.div>
-
+        <section className="relative mx-auto w-full max-w-[1300px] px-5 pb-20 pt-10 sm:px-8 sm:pb-28 sm:pt-14 lg:px-10 lg:pt-16">
+          <div className="grid min-w-0 grid-cols-1 items-start gap-y-8 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-x-12 lg:gap-y-10 xl:gap-x-16">
+            {/* En escritorio, la fotografía ocupa la columna izquierda.
+                En móviles, el titular aparece primero y la imagen conserva su tamaño natural. */}
             <motion.div
               {...itemMotion}
-              className="rounded-[1.8rem] border border-black/[0.045] bg-white p-5 text-[#1d1d1f] shadow-[0_22px_65px_rgba(28,33,51,0.065)] sm:rounded-[2.25rem] sm:p-9 lg:p-11"
+              className="min-w-0 lg:col-start-2 lg:row-start-1 lg:pt-4"
+            >
+              <h1 className="max-w-2xl text-balance text-[clamp(2.5rem,4.4vw,4.8rem)] font-extrabold leading-[1.07] tracking-[-0.06em]">
+                Tu experiencia puede
+                <span className="block bg-gradient-to-r from-[#285bff] via-[#3475f4] to-[#00b4de] bg-clip-text text-transparent">
+                  hacer la diferencia.
+                </span>
+              </h1>
+              <p className="mt-6 max-w-xl text-pretty text-base leading-7 text-[#777984] sm:text-lg sm:leading-8">
+                En SIS trabajamos por entornos laborales más seguros. Queremos conocer tu experiencia para futuros proyectos de seguridad y salud en el trabajo.
+              </p>
+              <a
+                href="#postulacion"
+                className="mt-7 inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-[#1d1d1f] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(29,29,31,0.13)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#244dce] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-500 sm:text-base"
+              >
+                Compartir mi hoja de vida
+                <ArrowRight aria-hidden="true" className="size-5" />
+              </a>
+            </motion.div>
+
+            <motion.figure
+              {...itemMotion}
+              className="min-w-0 overflow-hidden rounded-[1.7rem] border border-black/[0.045] bg-white shadow-[0_22px_65px_-25px_rgba(28,33,51,0.15)] sm:rounded-[2.2rem] lg:col-start-1 lg:row-start-1 lg:row-span-2"
+            >
+              <Image
+                src={gestionDocumentalImage}
+                alt="Profesional de SIS en su espacio de trabajo"
+                priority
+                placeholder="blur"
+                sizes="(max-width: 1023px) 100vw, (max-width: 1280px) 42vw, 510px"
+                className="block h-auto w-full object-contain"
+              />
+            </motion.figure>
+
+            <div id="postulacion" className="min-w-0 scroll-mt-6 lg:col-start-2 lg:row-start-2">
+            <motion.div
+              {...itemMotion}
+              className="min-w-0 rounded-[1.8rem] border border-black/[0.045] bg-white p-5 text-[#1d1d1f] shadow-[0_22px_65px_rgba(28,33,51,0.065)] sm:rounded-[2.25rem] sm:p-8 xl:p-10"
             >
               {state === "done" ? (
                 <div role="status" className="flex min-h-[430px] flex-col items-center justify-center py-12 text-center">
@@ -364,6 +356,7 @@ export default function TalentoLanding() {
                 </form>
               )}
             </motion.div>
+            </div>
           </div>
         </section>
       </main>
