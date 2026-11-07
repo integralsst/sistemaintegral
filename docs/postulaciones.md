@@ -12,7 +12,7 @@ Búsqueda por nombre/correo/profesión, ciudad, estado y paginación se ejecutan
 
 ## PDF privado
 
-Se usa el equivalente REST oficial de `private_download_url`: `https://api.cloudinary.com/v1_1/{cloud}/raw/download`, con `type=authenticated`, `public_id` completo incluyendo `.pdf`, `timestamp`, `expires_at` y firma SHA-1 del servidor. No se usa una firma permanente de la CDN.
+Se usa el equivalente REST oficial de `private_download_url`: `https://api.cloudinary.com/v1_1/{cloud}/raw/download`, con `type=authenticated`, `public_id` completo incluyendo `.pdf`, `format=pdf`, `timestamp`, `expires_at` y firma SHA-1 del servidor. No se usa una firma permanente de la CDN.
 
 Referencia: https://cloudinary.com/documentation/control_access_to_media#providing_time_limited_access_to_private_media_assets
 
@@ -41,3 +41,7 @@ Variables de servidor: `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET`, junto al 
 La tabla estaba vacía y el entorno local no tenía `CLOUDINARY_API_KEY` ni `CLOUDINARY_API_SECRET`. Por ello no se certifican todavía listado/paginación con filas reales, persistencia de cambios sobre un postulante real, entrega del PDF privado por Cloudinary, cabeceras CORS/inline, descarga ni rechazo de la firma expirada. No se introdujeron datos simulados en producción.
 
 Para cerrar esa validación: configurar las credenciales en el entorno, registrar una postulación de prueba autorizada mediante el formulario existente y comprobar recepción, filtros, estados, apertura/descarga, caducidad a los 120 segundos y reapertura con nueva autorización. Completar también la revisión manual en Safari y la navegación táctil del PDF en iOS. Mantener el PR en borrador hasta completar estas comprobaciones.
+
+## Compatibilidad de compilación Vercel
+
+El build CI emplea temporalmente `next build --webpack` para evitar el fallo del cargador de Plus Jakarta Sans en Turbopack de Next.js 16.2.10. No cambia la tipografía ni la ejecución en producción. Volver a evaluar Turbopack cuando Next.js publique una corrección y se compruebe con un deployment Preview. Validar el comando `npm run build` en Vercel antes de fusionar.
