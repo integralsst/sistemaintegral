@@ -108,9 +108,9 @@ test('PDF links use the official raw/download API, authenticated delivery and a 
     for (const download of [false, true]) {
       const signed = temporaryPdfUrl('talento-sis/test.pdf', download, 1700000000000); const url = new URL(signed.url); const params = url.searchParams;
       assert.equal(url.pathname, '/v1_1/isolated-test/raw/download'); assert.equal(params.get('type'), 'authenticated');
-      assert.equal(params.get('public_id'), 'talento-sis/test.pdf'); assert.equal(params.has('format'), false);
+      assert.equal(params.get('public_id'), 'talento-sis/test.pdf'); assert.equal(params.get('format'), 'pdf');
       assert.equal(Number(params.get('expires_at')) - Number(params.get('timestamp')), 120); assert.equal(params.get('attachment'), String(download));
-      const message = ['attachment', 'expires_at', 'public_id', 'timestamp', 'type'].map(key => `${key}=${params.get(key)}`).join('&');
+      const message = ['attachment', 'expires_at', 'format', 'public_id', 'timestamp', 'type'].map(key => `${key}=${params.get(key)}`).join('&');
       assert.equal(params.get('signature'), createHash('sha1').update(message + 'test-secret').digest('hex')); assert(!signed.url.includes('test-secret'));
     }
     const inline = await pdf.POST(request('/' + id + '/pdf', { method: 'POST', headers: { Origin: 'https://sis.test' } }), context);
