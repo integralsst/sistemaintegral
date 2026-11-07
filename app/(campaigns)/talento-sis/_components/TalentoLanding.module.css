@@ -1,0 +1,24 @@
+/* The document remains the only scroll container. The selector ceases to match
+   when navigating away, even if Next retains this stylesheet. */
+:global(html):has(.landing) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:global(html):has(.landing)::-webkit-scrollbar,
+:global(body):has(.landing)::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+@media (min-width: 1024px) {
+  .photo {
+    position: sticky;
+    top: 125px;
+    /* Original aspect ratio; the figure fits the photo without letterboxing.
+       Width also shrinks on short screens instead of cropping the image. */
+    width: min(100%, calc((100dvh - 149px) * 3 / 4));
+    justify-self: center;
+  }
+}
