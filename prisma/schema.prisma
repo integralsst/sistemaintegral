@@ -37,3 +37,49 @@ model Post {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
+
+enum EstadoPostulacion {
+  PENDIENTE
+  RECIBIDA
+  EN_REVISION
+  DESCARTADA
+}
+
+enum ModalidadPostulacion {
+  PRESENCIAL
+  VIRTUAL
+  MIXTA
+}
+
+// Datos de postulantes para campañas de reclutamiento SIS.
+// El PDF permanece en Cloudinary como RAW/AUTHENTICATED, nunca en MySQL.
+model PostulacionTalento {
+  id                 String               @id @default(cuid())
+  nombreCompleto     String               @db.VarChar(120)
+  correo             String               @db.VarChar(190)
+  telefono           String               @db.VarChar(30)
+  ciudad             String               @db.VarChar(120)
+  profesion          String               @db.VarChar(140)
+  aniosExperiencia   Int                  @default(0)
+  modalidad          ModalidadPostulacion
+  mensaje            String?              @db.Text
+  estado             EstadoPostulacion    @default(PENDIENTE)
+  hojaVidaNombre     String               @db.VarChar(180)
+  hojaVidaPublicId   String               @unique @db.VarChar(240)
+  hojaVidaAssetId    String?              @db.VarChar(80)
+  hojaVidaBytes      Int?
+  tokenHash          String               @db.Char(64)
+  tokenExpiraEn      DateTime
+  consentimientoEn   DateTime
+  utmSource          String?              @db.VarChar(120)
+  utmMedium          String?              @db.VarChar(120)
+  utmCampaign        String?              @db.VarChar(150)
+  utmContent         String?              @db.VarChar(150)
+  ipHash             String?              @db.Char(64)
+  creadoEn           DateTime             @default(now())
+  actualizadoEn      DateTime             @updatedAt
+
+  @@index([estado, creadoEn])
+  @@index([correo, creadoEn])
+  @@index([ipHash, creadoEn])
+}
