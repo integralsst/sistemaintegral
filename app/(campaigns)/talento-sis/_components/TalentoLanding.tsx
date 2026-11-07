@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import styles from "./TalentoLanding.module.css";
 import gestionDocumentalImage from "@/public/images/gestion-documental.webp";
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { ArrowRight, CheckCircle2, LoaderCircle, LockKeyhole, UploadCloud, X } from "lucide-react";
@@ -140,7 +142,7 @@ export default function TalentoLanding() {
       };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#f5f5f7] text-[#1d1d1f] selection:bg-blue-200 lg:flex lg:h-dvh lg:min-h-0 lg:flex-col lg:overflow-hidden">
+    <div className={`${styles.landing} relative min-h-screen overflow-x-clip bg-[#f5f5f7] text-[#1d1d1f] selection:bg-blue-200`}>
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-[680px] bg-[radial-gradient(ellipse_at_18%_22%,rgba(36,100,255,0.09),transparent_46%),radial-gradient(ellipse_at_86%_12%,rgba(0,186,220,0.08),transparent_44%)]"
@@ -148,9 +150,9 @@ export default function TalentoLanding() {
 
       <header className="relative z-20 px-4 pt-5 sm:px-8 sm:pt-7 lg:shrink-0">
         <nav aria-label="Navegación de postulaciones" className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 rounded-full border border-black/[0.055] bg-white/95 px-5 py-3 shadow-[0_10px_40px_rgba(28,33,51,0.07)] backdrop-blur-2xl sm:px-7">
-          <a href="/" aria-label="Ir a la página principal de SIS" className="inline-flex shrink-0 items-center">
-            <Image src="/images/logo.png" alt="SIS" width={128} height={44} priority className="h-9 w-auto max-w-[128px] object-contain" />
-          </a>
+          <Link href="/" aria-label="Ir a la página principal de SIS" className="inline-flex shrink-0 items-center">
+            <Image src="/images/logo.png" alt="SIS" width={128} height={44} preload className="h-9 w-auto max-w-[128px] object-contain" />
+          </Link>
           <a
             href="#postulacion"
             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-[#1d1d1f] px-4 text-xs font-semibold text-white transition-colors duration-300 hover:bg-[#244dce] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 sm:px-6 sm:text-sm"
@@ -160,12 +162,12 @@ export default function TalentoLanding() {
         </nav>
       </header>
 
-      <main className="lg:min-h-0 lg:flex-1">
-        <section className="relative mx-auto w-full max-w-[1300px] px-5 pb-20 pt-10 sm:px-8 sm:pb-28 sm:pt-14 lg:h-full lg:overflow-hidden lg:px-10 lg:pb-5 lg:pt-5">
-          <div className="grid min-w-0 grid-cols-1 items-start gap-y-8 lg:h-full lg:min-h-0 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:items-stretch lg:gap-x-12 lg:gap-y-0 xl:gap-x-16">
-            {/* Desktop: el panel derecho se desplaza independientemente de la imagen.
+      <main>
+        <section className="relative mx-auto w-full max-w-[1300px] px-5 pb-20 pt-10 sm:px-8 sm:pb-28 sm:pt-14 lg:px-10 lg:pb-5 lg:pt-5">
+          <div className="grid min-w-0 grid-cols-1 items-start gap-y-8 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-x-12 lg:gap-y-0 xl:gap-x-16">
+            {/* Desktop: scroll nativo del documento e imagen sticky.
                 Móvil: display contents conserva título → imagen → formulario. */}
-            <div className="contents lg:order-2 lg:block lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:scroll-smooth lg:pb-8 lg:pr-2 lg:[scrollbar-width:thin] lg:[scrollbar-color:#c8cbd2_transparent]">
+            <div className="contents lg:order-2 lg:block lg:pb-8">
             <motion.div
               {...itemMotion}
               className="order-1 min-w-0 lg:pt-4"
@@ -354,19 +356,19 @@ export default function TalentoLanding() {
               </div>
             </div>
 
-            <motion.figure
-              {...itemMotion}
-              className="order-2 min-w-0 overflow-hidden rounded-[1.7rem] border border-black/[0.045] bg-white shadow-[0_22px_65px_-25px_rgba(28,33,51,0.15)] sm:rounded-[2.2rem] lg:order-1 lg:flex lg:h-full lg:min-h-0 lg:items-center lg:justify-center"
+            <figure
+              className={`${styles.photo} order-2 min-w-0 overflow-hidden rounded-[1.7rem] shadow-[0_22px_65px_-25px_rgba(28,33,51,0.15)] sm:rounded-[2.2rem] lg:order-1`}
             >
               <Image
                 src={gestionDocumentalImage}
                 alt="Profesional de SIS en su espacio de trabajo"
-                priority
+                preload
+                unoptimized
                 placeholder="blur"
                 sizes="(max-width: 1023px) 100vw, (max-width: 1280px) 42vw, 510px"
-                className="block h-auto w-full object-contain lg:max-h-full lg:max-w-full lg:w-auto"
+                className="block h-auto w-full"
               />
-            </motion.figure>
+            </figure>
           </div>
         </section>
       </main>

@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FileText,
+  Users,
   LogOut,
   Menu,
   X,
@@ -27,6 +27,7 @@ export default function DashboardLayout({
   const menuItems = [
     { name: "Resumen", href: "/dashboard", icon: LayoutDashboard },
     { name: "Artículos", href: "/dashboard/posts", icon: FileText },
+    { name: "Postulaciones", href: "/dashboard/postulaciones", icon: Users },
   ];
 
   const mockUser = {
@@ -48,7 +49,7 @@ export default function DashboardLayout({
 
   return (
     /* Fondo principal: El color #F5F5F7 es el clásico gris claro de Apple */
-    <div className="min-h-screen bg-[#F5F5F7] flex font-sans text-gray-900 overflow-hidden selection:bg-blue-200">
+    <div className="min-h-screen bg-[#F5F5F7] flex text-gray-900 overflow-hidden selection:bg-blue-200">
       
       {/* Overlay Móvil */}
       <div
@@ -175,7 +176,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Área de Contenido Principal */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="min-w-0 flex-1 flex flex-col h-screen overflow-hidden">
         
         {/* Cabecera Móvil - Glassmorphism */}
         <header className="bg-white/70 backdrop-blur-xl border-b border-gray-200/50 p-4 flex items-center justify-between md:hidden z-30 sticky top-0">
