@@ -18,6 +18,8 @@ function toString(value: FormDataEntryValue | null) {
 export default function TalentoLanding() {
   const formRef = useRef<HTMLFormElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  // Consentimiento explícito: nunca se selecciona automáticamente.
+  const [consentChecked, setConsentChecked] = useState(false);
   const [state, setState] = useState<SubmissionState>("idle");
   const [error, setError] = useState("");
   const [reference, setReference] = useState("");
@@ -49,6 +51,10 @@ export default function TalentoLanding() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy || state === "done") return;
+    if (!consentChecked) {
+      setError("Debes autorizar el tratamiento de datos personales para enviar tu postulación.");
+      return;
+    }
     if (!file) {
       setError("Selecciona tu hoja de vida en formato PDF.");
       return;
@@ -73,7 +79,7 @@ export default function TalentoLanding() {
           availability: toString(form.get("availability")),
           message: toString(form.get("message")),
           cvFileName: file.name,
-          consent: form.get("consent") === "on",
+          consent: consentChecked && form.get("consent") === "on",
           website: toString(form.get("website")),
           utmSource: params.get("utm_source")?.slice(0, 120) ?? "",
           utmMedium: params.get("utm_medium")?.slice(0, 120) ?? "",
@@ -117,6 +123,7 @@ export default function TalentoLanding() {
       setReference(confirmData.applicationId);
       setState("done");
       setFile(null);
+      setConsentChecked(false);
       formRef.current?.reset();
       // Evento solo después de registrar el PDF y la postulación exitosamente.
       const browser = window as Window & { dataLayer?: Array<Record<string, unknown>>; fbq?: (...args: unknown[]) => void };
@@ -313,9 +320,18 @@ export default function TalentoLanding() {
                   </div>
 
                   <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#e5e5e7] bg-[#f7f8fa] p-4 sm:p-5">
-                    <input name="consent" type="checkbox" required disabled={busy} className="mt-1 size-4 shrink-0 accent-[#285bff]" />
+                    <input
+                      name="consent"
+                      type="checkbox"
+                      required
+                      aria-required="true"
+                      checked={consentChecked}
+                      onChange={(event) => setConsentChecked(event.currentTarget.checked)}
+                      disabled={busy}
+                      className="mt-1 size-4 shrink-0 accent-[#285bff]"
+                    />
                     <span className="text-xs leading-6 text-[#666a76]">
-                      <strong>Autorizo el tratamiento de mis datos personales</strong>, incluidos los contenidos en mi hoja de vida, por SIS para gestionar mi postulación, contactarme y evaluar posibles oportunidades profesionales. Puedo solicitar acceso, actualización, rectificación o supresión de mis datos escribiendo a <a className="font-semibold text-[#2455d5] underline underline-offset-2" href="mailto:contacto@sisriesgos.com">contacto@sisriesgos.com</a>. *
+                      <strong>Autorización obligatoria. Autorizo el tratamiento de mis datos personales</strong>, incluidos los contenidos en mi hoja de vida, por SIS para gestionar mi postulación, contactarme y evaluar posibles oportunidades profesionales. Puedo solicitar acceso, actualización, rectificación o supresión de mis datos escribiendo a <a className="font-semibold text-[#2455d5] underline underline-offset-2" href="mailto:contacto@sisriesgos.com">contacto@sisriesgos.com</a>. *
                     </span>
                   </label>
 
