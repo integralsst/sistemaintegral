@@ -70,7 +70,7 @@ export const detailSelect = {
 } satisfies Prisma.PostulacionTalentoSelect;
 
 // REST equivalent of Cloudinary utils.private_download_url. For RAW, the full
-// public_id includes .pdf; omit format to avoid appending the extension twice.
+// Keep the original raw public_id including .pdf; format is required by Cloudinary private_download_url.
 // A regular signed res.cloudinary.com delivery URL would NOT expire.
 // https://cloudinary.com/documentation/control_access_to_media
 export function temporaryPdfUrl(publicId: string, download: boolean, now = Date.now()) {
@@ -79,7 +79,7 @@ export function temporaryPdfUrl(publicId: string, download: boolean, now = Date.
   const timestamp = Math.floor(now / 1000);
   const expiresAt = timestamp + 120;
   const parameters = {
-    public_id: publicId, type: "authenticated", timestamp: String(timestamp),
+    public_id: publicId, format: "pdf", type: "authenticated", timestamp: String(timestamp),
     expires_at: String(expiresAt), attachment: String(download),
   };
   const query = new URLSearchParams({
