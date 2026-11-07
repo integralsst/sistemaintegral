@@ -66,7 +66,6 @@ export function parseCandidate(body: unknown) {
   const city = value("city", 120);
   const profession = value("profession", 140);
   const experience = value("experienceYears", 3);
-  const availability = value("availability", 20);
   const message = value("message", 1200);
   const cvFileName = value("cvFileName", 180);
   const utmSource = value("utmSource", 120);
@@ -81,7 +80,6 @@ export function parseCandidate(body: unknown) {
     city.length < 2 || city.length > 120 ||
     profession.length < 2 || profession.length > 140 ||
     !/^(0|[1-9][0-9]?)$/.test(experience) || Number(experience) > 60 ||
-    !["PRESENCIAL", "VIRTUAL", "MIXTA"].includes(availability) ||
     message.length > 1200 ||
     !/\.pdf$/i.test(cvFileName) || cvFileName.length > 180 ||
     [utmSource, utmMedium, utmCampaign, utmContent].some((x) => x.length > 150) ||
@@ -91,7 +89,6 @@ export function parseCandidate(body: unknown) {
   return {
     fullName, email, phone, city, profession,
     experienceYears: Number(experience),
-    availability: availability as "PRESENCIAL" | "VIRTUAL" | "MIXTA",
     message: message || null, cvFileName,
     utmSource: utmSource || null,
     utmMedium: utmMedium || null,
